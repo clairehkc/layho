@@ -1,0 +1,33 @@
+<html>
+<head>
+    <title>Live</title>
+    <meta charset="utf-8" />
+    <link href="style.css" rel="stylesheet" type="text/css">
+</head>
+<body>
+	<div id="buttonDiv"></div>
+	<div id="content" style="display:none">
+		<button id="startButton">Start</button>
+		<button id="stopButton" disabled="disabled">Stop</button>
+		<input id="voiceOutput" type="checkbox">
+		<label for="voiceOutput">voice output</label>
+		<input id="detectLanguageChange" type="checkbox">
+		<label for="detectLanguageChange">detect language change</label>
+
+
+		<div id="displayContainer">
+			<div id="resultsContainer">
+				<div class="textContainer" id="detected"></div>
+			    <div id="separator"></div>
+			    <div class="textContainer" id="translated"></div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Speech SDK REFERENCE -->
+	<script src="https://aka.ms/csspeech/jsbrowserpackageraw"></script>
+
+	<script src="https://accounts.google.com/gsi/client" async></script>
+	<script src="./index.js"></script>
+</body>
+</html>

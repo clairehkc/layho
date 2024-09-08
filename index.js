@@ -1,0 +1,324 @@
+const region = "westus";
+
+let SpeechSDK;
+let startButton, stopButton;
+let isListening = false;
+let speechRecognitionLanguage;
+let activeTranslationRecognizer; // current
+let translationRecognizer1;
+let translationRecognizer2;
+
+let soundContext = undefined;
+try {
+    let AudioContext = window.AudioContext // our preferred impl
+        || window.webkitAudioContext       // fallback, mostly when on Safari
+        || false;                          // could not find.
+
+    if (AudioContext) {
+        soundContext = new AudioContext();
+    } else {
+        alert("Audio context not supported");
+    }
+} catch (e) {
+    window.console.log("no sound context found, no audio output. " + e);
+}
+
+function resetUiForScenarioStart() {
+    detected.innerHTML = "";
+    translated.innerHTML = "";
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+    startButton = document.getElementById('startButton');
+    stopButton = document.getElementById('stopButton');
+
+    detected = document.getElementById("detected");
+    translated = document.getElementById("translated");
+
+    // key = document.getElementById("key");
+    const languageOptions = document.getElementById("languageOptions");
+    const languageTargetOptions = document.getElementById("languageTargetOptions");
+    
+    const voiceOutput = document.getElementById("voiceOutput");
+    const detectLanguageChange = document.getElementById("detectLanguageChange");
+
+    startButton.addEventListener("click", function () {
+        startContinuousTranslation();
+    });
+
+    stopButton.addEventListener("click", function() {
+        stopContinuousTranslation();
+    });
+
+    Initialize(async function (speechSdk) {
+        SpeechSDK = speechSdk;
+    });
+});
+
+function Initialize(onComplete) {
+    if (!!window.SpeechSDK) {
+        document.getElementById('content').style.display = 'block';
+        onComplete(window.SpeechSDK);
+    }
+}
+
+function getAudioConfig() {
+    return SpeechSDK.AudioConfig.fromDefaultMicrophoneInput();
+}
+
+function getSpeechConfig(sdkConfigType, detectedLanguage = undefined, newTargetLanguage = undefined, newTranslationVoice = undefined) {
+    let speechConfig;
+    if (!key) {
+        alert("Please enter your Cognitive Services Speech subscription key!");
+        return undefined;
+    } else {
+        // speechConfig = sdkConfigType.fromSubscription(key.value, region);
+        speechConfig = sdkConfigType.fromSubscription(key, region);
+    }
+
+    // Defines the language(s) that speech should be translated to.
+    // Multiple languages can be specified for text translation and will be returned in a map.
+    if (sdkConfigType == SpeechSDK.SpeechTranslationConfig) {
+        const targetLanguage = newTargetLanguage || "en-US";
+        speechConfig.addTargetLanguage(targetLanguage);
+        
+
+        // If voice output is requested, set the target voice.
+        // If multiple text translations were requested, only the first one added will have audio synthesised for it.
+        if (voiceOutput.checked) {
+            const translationVoice = newTranslationVoice || "en-US-AvaMultilingualNeural";
+            speechConfig.setProperty(SpeechSDK.PropertyId.SpeechServiceConnection_TranslationVoice, translationVoice);
+        }
+    }
+
+    // speechConfig.speechRecognitionLanguage = languageOptions.value;
+    speechConfig.speechRecognitionLanguage = detectedLanguage || "zh-HK";
+    speechRecognitionLanguage = speechConfig.speechRecognitionLanguage;
+    return speechConfig;
+}
+
+function onRecognizing(sender, recognitionEventArgs) {
+    if (sender.speechRecognitionLanguage !== speechRecognitionLanguage) return;
+    const result = recognitionEventArgs.result;
+    if (result.text) detected.innerHTML = detected.innerHTML.replace(/(.*)(^|[\r\n]+).*\[\.\.\.\][\r\n]+/, '$1$2')
+        + `${result.text} [...]\r\n`;
+}
+
+function onRecognized(sender, recognitionEventArgs) {
+    if (sender.speechRecognitionLanguage !== speechRecognitionLanguage) return;
+    const result = recognitionEventArgs.result;
+    onRecognizedResult(recognitionEventArgs.result);
+}
+
+function onRecognizedResult(result) {
+    detected.scrollTop = detected.scrollHeight;
+
+    if (result.text) detected.innerHTML = detected.innerHTML.replace(/(.*)(^|[\r\n]+).*\[\.\.\.\][\r\n]+/, '$1$2')
+        + `${result.text} [...]\r\n`;
+
+    switch (result.reason) {
+        case SpeechSDK.ResultReason.NoMatch:
+            const noMatchDetail = SpeechSDK.NoMatchDetails.fromResult(result);
+            break;
+        case SpeechSDK.ResultReason.Canceled:
+            const cancelDetails = SpeechSDK.CancellationDetails.fromResult(result);
+            break;
+        case SpeechSDK.ResultReason.RecognizedSpeech:
+        case SpeechSDK.ResultReason.TranslatedSpeech:
+            if (result.text) {
+                detected.innerHTML = `${result.text}\r\n`;
+            }
+
+            if (result.translations) {
+                const resultJson = JSON.parse(result.json);
+                resultJson['privTranslationPhrase']['Translation']['Translations'].forEach(
+                    function (translation) {
+                    translated.innerHTML = `${translation.Text}\r\n`;
+                });
+            }
+            break;
+    }
+}
+
+function onSessionStarted(sender, sessionEventArgs) {
+    startButton.disabled = true;
+    stopButton.disabled = false;
+}
+
+function onSessionStopped(sender, sessionEventArgs) {
+    startButton.disabled = false;
+    stopButton.disabled = true;
+}
+
+function onCanceled (sender, cancellationEventArgs) {
+    window.console.log(cancellationEventArgs);
+
+    if (cancellationEventArgs.reason === SpeechSDK.CancellationReason.Error) {
+        console.error("cancel due to error", cancellationEventArgs.errorDetails);
+    }
+}
+
+function applyCommonConfigurationTo(recognizer) {
+    // The 'recognizing' event signals that an intermediate recognition result is received.
+    // Intermediate results arrive while audio is being processed and represent the current "best guess" about
+    // what's been spoken so far.
+    recognizer.recognizing = onRecognizing;
+
+    // The 'recognized' event signals that a finalized recognition result has been received. These results are
+    // formed across complete utterance audio (with either silence or eof at the end) and will include
+    // punctuation, capitalization, and potentially other extra details.
+    // 
+    // * In the case of continuous scenarios, these final results will be generated after each segment of audio
+    //   with sufficient silence at the end.
+    // * In the case of intent scenarios, only these final results will contain intent JSON data.
+    // * Single-shot scenarios can also use a continuation on recognizeOnceAsync calls to handle this without
+    //   event registration.
+    recognizer.recognized = onRecognized;
+
+    // The 'canceled' event signals that the service has stopped processing speech.
+    // https://docs.microsoft.com/javascript/api/microsoft-cognitiveservices-speech-sdk/speechrecognitioncanceledeventargs?view=azure-node-latest
+    // This can happen for two broad classes of reasons:
+    // 1. An error was encountered.
+    //    In this case, the .errorDetails property will contain a textual representation of the error.
+    // 2. No additional audio is available.
+    //    This is caused by the input stream being closed or reaching the end of an audio file.
+    recognizer.canceled = onCanceled;
+
+    // The 'sessionStarted' event signals that audio has begun flowing and an interaction with the service has
+    // started.
+    recognizer.sessionStarted = onSessionStarted;
+
+    // The 'sessionStopped' event signals that the current interaction with the speech service has ended and
+    // audio has stopped flowing.
+    recognizer.sessionStopped = onSessionStopped;
+}
+
+function doContinuousTranslation(detectedLanguage = undefined, newTargetLanguage = undefined, newTranslationVoice = undefined) {
+    console.log("doContinuousTranslation", detectedLanguage);
+    isListening = true;
+    resetUiForScenarioStart();
+
+    const audioConfig = getAudioConfig();
+    const speechConfig = getSpeechConfig(SpeechSDK.SpeechTranslationConfig, detectedLanguage, newTargetLanguage, newTranslationVoice);
+    if (!audioConfig || !speechConfig) return;
+
+    // Create the TranslationRecognizer and set up common event handlers and PhraseListGrammar data.
+    activeTranslationRecognizer = new SpeechSDK.TranslationRecognizer(speechConfig, audioConfig);
+    applyCommonConfigurationTo(activeTranslationRecognizer);
+    console.log("speechConfig", speechConfig);
+
+    // Additive in TranslationRecognizer, the 'synthesizing' event signals that a payload chunk of synthesized
+    // text-to-speech data is available for playback.
+    // If the event result contains valid audio, it's reason will be ResultReason.SynthesizingAudio
+    // Once a complete phrase has been synthesized, the event will be called with
+    // ResultReason.SynthesizingAudioComplete and a 0-byte audio payload.
+    activeTranslationRecognizer.synthesizing = function (s, e) {
+        const audioSize = e.result.audio === undefined ? 0 : e.result.audio.byteLength;
+
+        if (e.result.audio && soundContext) {
+            const source = soundContext.createBufferSource();
+            soundContext.decodeAudioData(e.result.audio, function (newBuffer) {
+                source.buffer = newBuffer;
+                source.connect(soundContext.destination);
+                source.start(0);
+            });
+        }
+    };
+
+    // Start the continuous recognition/translation operation.
+    activeTranslationRecognizer.startContinuousRecognitionAsync();
+
+    if (detectLanguageChange.checked) {
+        // continuous language recognition and automatic switching
+        const speechRecognitionConfig = SpeechSDK.SpeechConfig.fromEndpoint(new URL(`wss://${region}.stt.speech.microsoft.com/speech/universal/v2`), key);
+        speechRecognitionConfig.setProperty(SpeechSDK.PropertyId.SpeechServiceConnection_LanguageIdMode, "Continuous")
+
+        const autoDetectSourceLanguageConfig = SpeechSDK.AutoDetectSourceLanguageConfig.fromLanguages(["en-US", "zh-HK",]);
+        const speechRecognizer = SpeechSDK.SpeechRecognizer.FromConfig(speechRecognitionConfig, autoDetectSourceLanguageConfig, audioConfig);
+
+        speechRecognizer.startContinuousRecognitionAsync(() => {
+            console.log("speechRecognizer started");
+        });
+        speechRecognizer.recognized = async (s, e) => {
+            if (e.result.reason === SpeechSDK.ResultReason.RecognizedSpeech) {
+                const detectedLanguage = e.result.privLanguage;
+                console.log("speechRecognitionLanguage", speechRecognitionLanguage);
+                console.log("detectedLanguage", detectedLanguage);
+                if (speechRecognitionLanguage && detectedLanguage !== speechRecognitionLanguage) {
+                    if (!(translationRecognizer1 && translationRecognizer2)) {
+                        console.error("missing recos for automatic switching");
+                        return;
+                    }
+
+                    if (detectedLanguage == "en-US") {
+                        speechRecognitionLanguage = "en-US";
+                        activeTranslationRecognizer = translationRecognizer2;
+                        console.log("set translationRecognizer2");
+                    } else {
+                        speechRecognitionLanguage = "zh-HK";
+                        activeTranslationRecognizer = translationRecognizer1;
+                        console.log("set translationRecognizer1");
+                    }
+
+
+                }
+            }
+        }
+    }
+    return activeTranslationRecognizer;
+}
+
+function startContinuousTranslation() {
+    translationRecognizer1 = doContinuousTranslation();
+    if (detectLanguageChange.checked) {
+        translationRecognizer2 = doContinuousTranslation("en-US", "yue", "zh-HK-HiuMaanNeural");
+        speechRecognitionLanguage = "zh-HK";
+        activeTranslationRecognizer = translationRecognizer1;
+    }
+}
+
+function stopContinuousTranslation() {
+    console.log("stopContinuousTranslation");
+    activeTranslationRecognizer.stopContinuousRecognitionAsync(
+        function () {
+            translationRecognizer1.close();
+            translationRecognizer2.close();
+            activeTranslationRecognizer = undefined;
+            translationRecognizer1 = undefined;
+            translationRecognizer2 = undefined;
+        }
+    );
+    isListening = false;
+}
+
+function onStartKeyPress() {
+    startContinuousTranslation();
+}
+
+function onStopKeyPress() {
+    stopContinuousTranslation();
+}
+
+document.addEventListener('keydown', (e) => {
+    if (e.key === "s") {
+        if (!isListening) {
+            onStartKeyPress()
+        } else {
+            onStopKeyPress();
+        }
+    }
+});
+
+function handleCredentialResponse(response) {
+    console.log("Encoded JWT ID token: " + response.credential);
+}
+window.onload = function () {
+    google.accounts.id.initialize({
+        client_id,
+        callback: handleCredentialResponse
+    });
+    google.accounts.id.renderButton(
+        document.getElementById("buttonDiv"),
+        { theme: "outline", size: "large" }  // customization attributes
+    );
+}

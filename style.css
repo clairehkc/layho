@@ -1,0 +1,30 @@
+body {
+	color: #FFF;
+	background-color: #000;
+	margin: 0;
+}
+
+#displayContainer {
+	width: 100width;
+	height: 92vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#resultsContainer {
+	margin: 12px;
+}
+
+.textContainer {
+/*	font-size: 20vh;*/
+	color: #ffe400;
+	font-size: calc(4vw + 4vh + 2vmin);
+	text-align: center;
+}
+
+#separator {
+	height: 8px;
+	background-color: #868686;
+	margin: 4vh 4px 4vh 4px;
+}
