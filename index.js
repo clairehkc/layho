@@ -40,7 +40,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const languageTargetOptions = document.getElementById("languageTargetOptions");
     
     const voiceOutput = document.getElementById("voiceOutput");
-    const detectLanguageChange = document.getElementById("detectLanguageChange");
+    const conversationMode = document.getElementById("conversationMode");
 
     startButton.addEventListener("click", function () {
         startContinuousTranslation();
@@ -69,6 +69,7 @@ function getAudioConfig() {
 function getSpeechConfig(sdkConfigType, detectedLanguage = undefined, newTargetLanguage = undefined, newTranslationVoice = undefined) {
     let speechConfig;
     if (!apiKey) {
+        console.error('no apiKey');
         return undefined;
     } else {
         speechConfig = sdkConfigType.fromSubscription(apiKey, region);
@@ -226,7 +227,7 @@ function doContinuousTranslation(detectedLanguage = undefined, newTargetLanguage
     // Start the continuous recognition/translation operation.
     activeTranslationRecognizer.startContinuousRecognitionAsync();
 
-    if (detectLanguageChange.checked) {
+    if (conversationMode.checked) {
         // continuous language recognition and automatic switching
         const speechRecognitionConfig = SpeechSDK.SpeechConfig.fromEndpoint(new URL(`wss://${region}.stt.speech.microsoft.com/speech/universal/v2`), apiKey);
         speechRecognitionConfig.setProperty(SpeechSDK.PropertyId.SpeechServiceConnection_LanguageIdMode, "Continuous")
@@ -268,7 +269,7 @@ function doContinuousTranslation(detectedLanguage = undefined, newTargetLanguage
 
 function startContinuousTranslation() {
     translationRecognizer1 = doContinuousTranslation();
-    if (detectLanguageChange.checked) {
+    if (conversationMode.checked) {
         translationRecognizer2 = doContinuousTranslation("en-US", "yue", "zh-HK-HiuMaanNeural");
         speechRecognitionLanguage = "zh-HK";
         activeTranslationRecognizer = translationRecognizer1;
@@ -277,6 +278,7 @@ function startContinuousTranslation() {
 
 function stopContinuousTranslation() {
     console.log("stopContinuousTranslation");
+    if (!activeTranslationRecognizer) return;
     activeTranslationRecognizer.stopContinuousRecognitionAsync(
         function () {
             translationRecognizer1.close();
@@ -321,7 +323,7 @@ async function fetchApiKey(token) {
         }
 
         const json = await response.json();
-        apiKey = json.key;
+        apiKey = json.body.key;
         console.log("res", json);
     } catch (error) {
         console.error(error.message);
