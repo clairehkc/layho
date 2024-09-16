@@ -1,5 +1,6 @@
 const region = "westus";
 
+let apiKey;
 let SpeechSDK;
 let startButton, stopButton;
 let isListening = false;
@@ -35,7 +36,6 @@ document.addEventListener("DOMContentLoaded", function () {
     detected = document.getElementById("detected");
     translated = document.getElementById("translated");
 
-    // key = document.getElementById("key");
     const languageOptions = document.getElementById("languageOptions");
     const languageTargetOptions = document.getElementById("languageTargetOptions");
     
@@ -68,12 +68,10 @@ function getAudioConfig() {
 
 function getSpeechConfig(sdkConfigType, detectedLanguage = undefined, newTargetLanguage = undefined, newTranslationVoice = undefined) {
     let speechConfig;
-    if (!key) {
-        alert("Please enter your Cognitive Services Speech subscription key!");
+    if (!apiKey) {
         return undefined;
     } else {
-        // speechConfig = sdkConfigType.fromSubscription(key.value, region);
-        speechConfig = sdkConfigType.fromSubscription(key, region);
+        speechConfig = sdkConfigType.fromSubscription(apiKey, region);
     }
 
     // Defines the language(s) that speech should be translated to.
@@ -230,7 +228,7 @@ function doContinuousTranslation(detectedLanguage = undefined, newTargetLanguage
 
     if (detectLanguageChange.checked) {
         // continuous language recognition and automatic switching
-        const speechRecognitionConfig = SpeechSDK.SpeechConfig.fromEndpoint(new URL(`wss://${region}.stt.speech.microsoft.com/speech/universal/v2`), key);
+        const speechRecognitionConfig = SpeechSDK.SpeechConfig.fromEndpoint(new URL(`wss://${region}.stt.speech.microsoft.com/speech/universal/v2`), apiKey);
         speechRecognitionConfig.setProperty(SpeechSDK.PropertyId.SpeechServiceConnection_LanguageIdMode, "Continuous")
 
         const autoDetectSourceLanguageConfig = SpeechSDK.AutoDetectSourceLanguageConfig.fromLanguages(["en-US", "zh-HK",]);
@@ -309,10 +307,35 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
+async function fetchApiKey(token) {
+    const loginUrl = "https://7txxt2ts1e.execute-api.us-west-1.amazonaws.com/stage/loginLayho";
+    try {
+        const response = await fetch(loginUrl, {
+            headers: {
+                "Content-Type": "application/json",
+                token,
+            },
+        });
+        if (!response.ok) {
+            throw new Error(`Response status: ${response.status}`);
+        }
+
+        const json = await response.json();
+        apiKey = json.key;
+        console.log("res", json);
+    } catch (error) {
+        console.error(error.message);
+    }
+}
+
 function handleCredentialResponse(response) {
     console.log("Encoded JWT ID token: " + response.credential);
+    fetchApiKey(response.credential);
 }
+
 window.onload = function () {
+    const client_id = "699001412765-r6d8ck46h18u9uk7b4dlddncospqcci1.apps.googleusercontent.com";
+
     google.accounts.id.initialize({
         client_id,
         callback: handleCredentialResponse
@@ -321,4 +344,10 @@ window.onload = function () {
         document.getElementById("buttonDiv"),
         { theme: "outline", size: "large" }  // customization attributes
     );
+
+    const signOutButton = document.getElementById('signOutButton');
+    signOutButton.onclick = () => {
+        console.log('logged out');
+    };
 }
+
