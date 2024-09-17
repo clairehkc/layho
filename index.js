@@ -315,7 +315,7 @@ async function fetchApiKey(token) {
         const response = await fetch(loginUrl, {
             headers: {
                 "Content-Type": "application/json",
-                token,
+                "Authorization": `Bearer ${token}`,
             },
         });
         if (!response.ok) {
