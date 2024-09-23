@@ -194,6 +194,11 @@ function applyCommonConfigurationTo(recognizer) {
 
 function doContinuousTranslation(detectedLanguage = undefined, newTargetLanguage = undefined, newTranslationVoice = undefined) {
     console.log("doContinuousTranslation", detectedLanguage);
+    if (!apiKey) {
+        console.error('no apiKey');
+        return undefined;
+    }
+
     isListening = true;
     resetUiForScenarioStart();
 
@@ -302,12 +307,14 @@ function onStopKeyPress() {
 document.addEventListener('keydown', (e) => {
     if (e.key === "s") {
         if (!isListening) {
-            onStartKeyPress()
+            onStartKeyPress();
         } else {
             onStopKeyPress();
         }
     }
 });
+
+const signInCookieName = "layho_jwt";
 
 async function fetchApiKey(token) {
     const loginUrl = "https://7txxt2ts1e.execute-api.us-west-1.amazonaws.com/stage/loginLayho";
@@ -332,7 +339,22 @@ async function fetchApiKey(token) {
 
 function handleCredentialResponse(response) {
     console.log("Encoded JWT ID token: " + response.credential);
+    document.cookie = `${signInCookieName}=${response.credential}; SameSite=None; Secure`;
     fetchApiKey(response.credential);
+}
+
+function checkSignedIn() {
+    const savedToken = document.cookie
+        .split("; ")
+        .find((row) => row.startsWith(`${signInCookieName}=`))
+        ?.split("=")[1];
+    console.log("savedToken", savedToken);
+    if (savedToken) fetchApiKey(savedToken);
+}
+
+function signOut() {
+    document.cookie = `${signInCookieName}=; SameSite=None; Secure`;
+    apiKey = undefined;
 }
 
 window.onload = function () {
@@ -349,7 +371,9 @@ window.onload = function () {
 
     const signOutButton = document.getElementById('signOutButton');
     signOutButton.onclick = () => {
-        console.log('logged out');
+        signOut();
     };
+
+    checkSignedIn();
 }
 
