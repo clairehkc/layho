@@ -58,7 +58,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
 function Initialize(onComplete) {
     if (!!window.SpeechSDK) {
-        document.getElementById('content').style.display = 'block';
         onComplete(window.SpeechSDK);
     }
 }

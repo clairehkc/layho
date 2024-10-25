@@ -5,16 +5,24 @@
     <link href="style.css" rel="stylesheet" type="text/css">
 </head>
 <body>
-	<div id="buttonDiv"></div>
-	<div id="signOutButton">Sign out</div>
-	<div id="content" style="display:none">
+	<div id="introContainer">
+		<div id="introTextContainer">
+			<div class="introText" id="helloText">Layho</div>
+			<div class="introText" id="nameText"></div>
+			<div class="introText" id="signInOutContainer">
+				<div id="signInButton" style="display: none"></div>
+				<div id="signOutButton" style="display: none">Sign out</div>
+			</div>
+		</div>
+	</div>
+
+	<div id="content" style="display: none">
 		<button id="startButton">Start</button>
 		<button id="stopButton" disabled="disabled">Stop</button>
 		<input id="voiceOutput" type="checkbox">
 		<label for="voiceOutput">Voice output</label>
 		<input id="conversationMode" type="checkbox">
 		<label for="conversationMode">Conversation mode</label>
-
 
 		<div id="displayContainer">
 			<div id="resultsContainer">

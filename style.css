@@ -4,12 +4,59 @@ body {
 	margin: 0;
 }
 
+#introContainer {
+	width: 100%;
+	height: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	margin-top: 6vw;
+}
+
+#introTextContainer {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-wrap: wrap;
+	width: 32vw;
+	color: #ffe400;
+}
+
+.introText {
+	display: flex;
+    align-items: center;
+    justify-content: center;
+	width: 100%;
+	margin-bottom: 3vw;
+}
+
+#helloText {
+	font-size: 10vw;
+}
+
+#signInOutContainer, #nameText {
+	height: 4vw;
+	margin-bottom: 2vw;
+}
+
+#nameText {
+	font-size: 4vw;
+}
+
+#signInButton {
+	height: 4vw;
+}
+
+#signOutButton {
+	cursor: pointer;
+}
+
 #displayContainer {
-	width: 100width;
+	display: flex;
+	width: 100vw;
 	height: 92vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+	align-items: center;
+	justify-content: center;
 }
 
 #resultsContainer {
@@ -17,7 +64,6 @@ body {
 }
 
 .textContainer {
-/*	font-size: 20vh;*/
 	color: #ffe400;
 	font-size: calc(4vw + 4vh + 2vmin);
 	text-align: center;
