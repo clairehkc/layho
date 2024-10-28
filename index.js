@@ -17,8 +17,7 @@ async function fetchApiKey(token) {
 
         console.log("res", json);
         if (json.statusCode === 200) {
-            document.getElementById("nameText").innerHTML = json.body.name;
-            document.getElementById("content").style.display = 'block';
+            onSignIn(json.body.name);
             apiKey = json.body.key;
         }
 
@@ -43,25 +42,26 @@ function checkSignedIn() {
         ?.split("=")[1];
     console.log("savedToken", savedToken);
     if (savedToken) {
-        const key = fetchApiKey(savedToken);
-        console.log('key', key);
-        if (!key) {
-            document.getElementById("signInButton").style.display = 'flex';
-        } else {
-            document.getElementById("signOutButton").style.display = 'flex';
-        }
+        fetchApiKey(savedToken);
     } else {
         document.getElementById("signInButton").style.display = 'flex';
-    }
-    
+    }    
 }
 
-function signOut() {
+function onSignIn(name) {
+    document.getElementById("nameText").innerHTML = name;
+    // document.getElementById("content").style.display = 'block';
+    document.getElementById("settingsStartContainer").style.visibility = 'visible';
+    document.getElementById("signOutButton").style.display = 'flex';
+}
+
+function onSignOut() {
     document.cookie = `${signInCookieName}=; SameSite=None; Secure`;
     apiKey = undefined;
     document.getElementById("signOutButton").style.display = 'none';
     document.getElementById("signInButton").style.display = 'flex';
     document.getElementById("nameText").innerHTML = "";
+    document.getElementById("settingsStartContainer").style.visibility = 'hidden';
 }
 
 window.onload = function () {
@@ -78,8 +78,21 @@ window.onload = function () {
 
     const signOutButton = document.getElementById('signOutButton');
     signOutButton.onclick = () => {
-        signOut();
+        onSignOut();
     };
 
     checkSignedIn();
 }
+
+function showSettings() {
+
+}
+
+function hideSettings() {
+
+}
+
+const settingsButton = document.getElementById("settingsButton");
+settingsButton.onclick = () => {
+    showSettings();
+};

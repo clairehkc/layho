@@ -1,3 +1,15 @@
+@property --primary-text-color {
+	syntax: "<color>";
+	inherits: false;
+	initial-value: #ffe400;
+}
+
+@property --hover-text-color {
+	syntax: "<color>";
+	inherits: false;
+	initial-value: #FFF;
+}
+
 body {
 	color: #FFF;
 	background-color: #000;
@@ -6,11 +18,11 @@ body {
 
 #introContainer {
 	width: 100%;
-	height: 100%;
+	height: 84vh;
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	margin-top: 6vw;
+	margin-top: 16vh;
 }
 
 #introTextContainer {
@@ -18,8 +30,8 @@ body {
 	align-items: center;
 	justify-content: center;
 	flex-wrap: wrap;
-	width: 32vw;
-	color: #ffe400;
+	width: 328px;
+	color: var(--primary-text-color);
 }
 
 .introText {
@@ -27,28 +39,46 @@ body {
     align-items: center;
     justify-content: center;
 	width: 100%;
-	margin-bottom: 3vw;
+	padding: 2vh 0 2vh 0;
 }
 
 #helloText {
-	font-size: 10vw;
-}
-
-#signInOutContainer, #nameText {
-	height: 4vw;
-	margin-bottom: 2vw;
+	font-size: 8em;
+	padding: 6vh 0 6vh 0;
 }
 
 #nameText {
-	font-size: 4vw;
+	height: 6vh;
+	font-size: 3em;
 }
 
-#signInButton {
-	height: 4vw;
+#signInOutContainer, #signInButton, #signOutButton {
+	height: 2vh;
 }
 
 #signOutButton {
+	font-size: 1em;
 	cursor: pointer;
+}
+
+#signOutButton:hover {
+	color: var(--hover-text-color);
+}
+
+#settingsStartContainer {
+	height: 4vh;
+	padding-top: 6vh;
+	font-size: 2em;
+	flex-direction: row;
+	justify-content: space-evenly;
+}
+
+#settingsButton, #start  {
+	cursor: pointer;
+}
+
+#settingsButton:hover, #start:hover  {
+	color: var(--hover-text-color);
 }
 
 #displayContainer {
@@ -64,7 +94,7 @@ body {
 }
 
 .textContainer {
-	color: #ffe400;
+	color: var(--primary-text-color);
 	font-size: calc(4vw + 4vh + 2vmin);
 	text-align: center;
 }
