@@ -19,6 +19,8 @@ async function fetchApiKey(token) {
         if (json.statusCode === 200) {
             onSignIn(json.body.name);
             apiKey = json.body.key;
+        } else {
+            document.getElementById("signInButton").style.display = 'flex';
         }
 
         return apiKey;
@@ -50,8 +52,8 @@ function checkSignedIn() {
 
 function onSignIn(name) {
     document.getElementById("nameText").innerHTML = name;
-    // document.getElementById("content").style.display = 'block';
-    document.getElementById("settingsStartContainer").style.visibility = 'visible';
+    // document.getElementById("translationContainer").style.display = 'block';
+    document.getElementById("settingsStartButtonContainer").style.visibility = 'visible';
     document.getElementById("signOutButton").style.display = 'flex';
 }
 
@@ -61,7 +63,15 @@ function onSignOut() {
     document.getElementById("signOutButton").style.display = 'none';
     document.getElementById("signInButton").style.display = 'flex';
     document.getElementById("nameText").innerHTML = "";
-    document.getElementById("settingsStartContainer").style.visibility = 'hidden';
+    document.getElementById("settingsStartButtonContainer").style.visibility = 'hidden';
+}
+
+function showSettings() {
+    document.getElementById("settingsModal").style.display = 'flex';
+}
+
+function closeSettings() {
+    document.getElementById("settingsModal").style.display = 'none';
 }
 
 window.onload = function () {
@@ -76,23 +86,20 @@ window.onload = function () {
         { theme: "outline", size: "large" }  // customization attributes
     );
 
-    const signOutButton = document.getElementById('signOutButton');
+    const signOutButton = document.getElementById("signOutButton");
     signOutButton.onclick = () => {
         onSignOut();
     };
 
+    const settingsButton = document.getElementById("settingsButton");
+    settingsButton.onclick = () => {
+        showSettings();
+    };
+
+    const settingsCloseButton = document.getElementById("settingsCloseButton");
+    settingsCloseButton.onclick = () => {
+        closeSettings();
+    };
+
     checkSignedIn();
 }
-
-function showSettings() {
-
-}
-
-function hideSettings() {
-
-}
-
-const settingsButton = document.getElementById("settingsButton");
-settingsButton.onclick = () => {
-    showSettings();
-};

@@ -1,28 +1,42 @@
-@property --primary-text-color {
+@property --primary-bg-color {
+	syntax: "<color>";
+	inherits: false;
+	initial-value: #000;
+}
+
+@property --primary-fg-color {
 	syntax: "<color>";
 	inherits: false;
 	initial-value: #ffe400;
 }
 
-@property --hover-text-color {
+@property --secondary-fg-color {
 	syntax: "<color>";
 	inherits: false;
-	initial-value: #FFF;
+	initial-value: #124eff;
 }
 
 body {
-	color: #FFF;
-	background-color: #000;
+	background-color: var(--primary-bg-color);
+	color: var(--primary-fg-color);
 	margin: 0;
+}
+
+#contentContainer {
+	width: 100%;
+	height: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
 }
 
 #introContainer {
 	width: 100%;
-	height: 84vh;
+	height: 88vh;
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	margin-top: 16vh;
+	margin-top: 12vh;
 }
 
 #introTextContainer {
@@ -31,7 +45,7 @@ body {
 	justify-content: center;
 	flex-wrap: wrap;
 	width: 328px;
-	color: var(--primary-text-color);
+	color: var(--primary-fg-color);
 }
 
 .introText {
@@ -62,10 +76,10 @@ body {
 }
 
 #signOutButton:hover {
-	color: var(--hover-text-color);
+	color: var(--secondary-fg-color);
 }
 
-#settingsStartContainer {
+#settingsStartButtonContainer {
 	height: 4vh;
 	padding-top: 6vh;
 	font-size: 2em;
@@ -73,12 +87,91 @@ body {
 	justify-content: space-evenly;
 }
 
-#settingsButton, #start  {
+#settingsButton, #settingsCloseButton, #start  {
 	cursor: pointer;
 }
 
 #settingsButton:hover, #start:hover  {
-	color: var(--hover-text-color);
+	color: var(--secondary-fg-color);
+}
+
+#settingsModal {
+	position: absolute;
+	width: 100%;
+	height: 80vh;
+	z-index: 1;
+	background-color: var(--primary-fg-color);
+	color: var(--primary-bg-color);
+}
+
+#settingsContainer {
+	width: 100%;
+	height: 80vh;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+#settingsContentContainer {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	width: 328px;
+}
+
+#settingsHeader {
+	font-size: 3em;
+	padding: 4vh 0 4vh 0;
+}
+
+#settingsList {
+	padding: 2vh 0 2vh 0;
+}
+
+.setting {
+	display: flex;
+	flex-wrap: wrap;
+    align-items: center;
+	width: 100%;
+	padding: 2vh 0 2vh 0;
+}
+
+.settingTitle {
+	width: 100%;
+	font-size: 2em;
+	padding: 1vh 0 1vh 0;
+}
+
+.settingOption {
+	display: flex;
+	align-items: center;
+	width: 100%;
+	padding: 1vh 0 1vh 16px;
+}
+
+.settingOptionLabel {
+	font-size: 1.6em;
+	padding-right: 12px;
+}
+
+select {
+	height: 2em;
+}
+
+#settingsCloseButton {
+	display: flex;
+    align-items: center;
+	width: 100%;
+	font-size: 1.2em;
+	padding: 4vh 0 4vh 0;
+}
+
+#settingsCloseButton:hover  {
+	color: var(--secondary-fg-color);
+}
+
+#controlsContainer {
+	color: #FFF;
 }
 
 #displayContainer {
@@ -94,7 +187,7 @@ body {
 }
 
 .textContainer {
-	color: var(--primary-text-color);
+	color: var(--primary-fg-color);
 	font-size: calc(4vw + 4vh + 2vmin);
 	text-align: center;
 }
