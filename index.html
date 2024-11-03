@@ -28,7 +28,7 @@
 						<div class="setting">
 							<div class="settingTitle">Language</div>
 							<div class="settingOption">
-								<div class="settingOptionLabel">Translate from:</div>
+								<label for="languageOptions" class="settingOptionLabel">Translate from:</label>
 								<select id="languageOptions">
 									<option value="ar-EG">Arabic - EG</option>
 									<option value="my-MM">Burmese - MM</option>
@@ -65,7 +65,7 @@
 								</select>
 							</div>
 							<div class="settingOption">
-								<div class="settingOptionLabel">Translate to:</div>
+								<label for="languageTargetOptions" class="settingOptionLabel">Translate to:</label>
 								<select id="languageTargetOptions">
 									<option value="ar-EG-SalmaNeural">Arabic - EG</option>
 									<option value="my-MM-NilarNeural">Burmese - MM</option>
@@ -101,8 +101,10 @@
 									<option value="vi-VN-HoaiMyNeural">Vietnamese - VN</option>
 								</select>
 							</div>
+						</div>
+					</div>
+					<div id="settingsCloseButton">Close</div>
 				</div>
-				<div id="settingsCloseButton">Close</div>
 			</div>
 		</div>
 		<div id="translationContainer" style="display: none">
@@ -113,6 +115,7 @@
 				<label for="voiceOutput">Voice output</label>
 				<input id="conversationMode" type="checkbox">
 				<label for="conversationMode">Conversation mode</label>
+				<button id="translateViewSettingsButton">Settings</button>
 			</div>
 			<div id="displayContainer">
 				<div id="resultsContainer">
@@ -123,7 +126,6 @@
 			</div>
 		</div>
 	</div>
-
 	<!-- Speech SDK REFERENCE -->
 	<script src="https://aka.ms/csspeech/jsbrowserpackageraw"></script>
 

@@ -144,6 +144,7 @@ body {
 .settingOption {
 	display: flex;
 	align-items: center;
+	justify-content: space-between;
 	width: 100%;
 	padding: 1vh 0 1vh 16px;
 }
@@ -155,12 +156,12 @@ body {
 
 select {
 	height: 2em;
+	width: 12em;
 }
 
 #settingsCloseButton {
 	display: flex;
     align-items: center;
-	width: 100%;
 	font-size: 1.2em;
 	padding: 4vh 0 4vh 0;
 }

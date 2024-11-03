@@ -54,6 +54,11 @@ document.addEventListener("DOMContentLoaded", function () {
     Initialize(async function (speechSdk) {
         SpeechSDK = speechSdk;
     });
+
+    const translateViewSettingsButton = document.getElementById("translateViewSettingsButton");
+    translateViewSettingsButton.addEventListener("click", function () {
+        showSettings();
+    });
 });
 
 function Initialize(onComplete) {
@@ -78,21 +83,23 @@ function getSpeechConfig(sdkConfigType, detectedLanguage = undefined, newTargetL
     // Defines the language(s) that speech should be translated to.
     // Multiple languages can be specified for text translation and will be returned in a map.
     if (sdkConfigType == SpeechSDK.SpeechTranslationConfig) {
-        const targetLanguage = newTargetLanguage || "en-US";
+        const selectedTargetLanguage = languageTargetOptions.value;
+        const targetLanguage = newTargetLanguage || selectedTargetLanguage.substring(0, 5);
         speechConfig.addTargetLanguage(targetLanguage);
+        console.log("target language:", targetLanguage);
         
 
         // If voice output is requested, set the target voice.
         // If multiple text translations were requested, only the first one added will have audio synthesised for it.
         if (voiceOutput.checked) {
-            const translationVoice = newTranslationVoice || "en-US-AmberNeural";
+            const translationVoice = newTranslationVoice || selectedTargetLanguage;
             speechConfig.setProperty(SpeechSDK.PropertyId.SpeechServiceConnection_TranslationVoice, translationVoice);
         }
     }
 
-    // speechConfig.speechRecognitionLanguage = languageOptions.value;
-    speechConfig.speechRecognitionLanguage = detectedLanguage || "zh-HK";
+    speechConfig.speechRecognitionLanguage = detectedLanguage || languageOptions.value;
     speechRecognitionLanguage = speechConfig.speechRecognitionLanguage;
+    console.log("recognition language:", languageOptions.value);
     return speechConfig;
 }
 

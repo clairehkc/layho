@@ -52,7 +52,6 @@ function checkSignedIn() {
 
 function onSignIn(name) {
     document.getElementById("nameText").innerHTML = name;
-    // document.getElementById("translationContainer").style.display = 'block';
     document.getElementById("settingsStartButtonContainer").style.visibility = 'visible';
     document.getElementById("signOutButton").style.display = 'flex';
 }
@@ -99,6 +98,12 @@ window.onload = function () {
     const settingsCloseButton = document.getElementById("settingsCloseButton");
     settingsCloseButton.onclick = () => {
         closeSettings();
+    };
+
+    const start = document.getElementById("start");
+    start.onclick= () => {
+        document.getElementById("introContainer").style.display = 'none';
+        document.getElementById("translationContainer").style.display = 'block';
     };
 
     checkSignedIn();
