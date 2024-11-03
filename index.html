@@ -12,11 +12,11 @@
 				<div class="introText" id="nameText"></div>
 				<div class="introText" id="signInOutContainer">
 					<div id="signInButton" style="display: none"></div>
-					<div id="signOutButton" style="display: none">Sign out</div>
+					<button id="signOutButton" style="display: none">Sign out</button>
 				</div>
 				<div class="introText" id="settingsStartButtonContainer" style="visibility: hidden">	
-					<div id="settingsButton">Settings</div>
-					<div id="start">START</div>
+					<button id="settingsButton">Settings</button>
+					<button id="startAppButton">START</button>
 				</div>
 			</div>
 		</div>
@@ -103,7 +103,7 @@
 							</div>
 						</div>
 					</div>
-					<div id="settingsCloseButton">Close</div>
+					<button id="settingsCloseButton">Close</button>
 				</div>
 			</div>
 		</div>
@@ -116,12 +116,18 @@
 				<input id="conversationMode" type="checkbox">
 				<label for="conversationMode">Conversation mode</label>
 				<button id="translateViewSettingsButton">Settings</button>
+				<button id="homeButton">Home</button>
 			</div>
-			<div id="displayContainer">
+			<div id="languageSelectionDisplay">
+				<div id="languageOptionDisplay"></div>
+				<button id="languageSwitchButton">SWITCH</button>
+				<div id="languageTargetDisplay"></div>
+			</div>
+			<div id="translationDisplayContainer">
 				<div id="resultsContainer">
-					<div class="textContainer" id="detected"></div>
+					<div class="translationTextContainer" id="detected"></div>
 					<div id="separator"></div>
-					<div class="textContainer" id="translated"></div>
+					<div class="translationTextContainer" id="translated"></div>
 				</div>
 			</div>
 		</div>

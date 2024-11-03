@@ -26,8 +26,8 @@ try {
 }
 
 function resetUiForScenarioStart() {
-    detected.innerHTML = "";
-    translated.innerHTML = "";
+    detected.textContent = "";
+    translated.textContent = "";
 }
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -39,7 +39,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const languageOptions = document.getElementById("languageOptions");
     const languageTargetOptions = document.getElementById("languageTargetOptions");
-    
+
+    const languageOptionDisplay =  document.getElementById("languageOptionDisplay");
+    const languageTargetDisplay =  document.getElementById("languageTargetDisplay");
+    const languageSwitchButton = document.getElementById("languageSwitchButton");
+
     const voiceOutput = document.getElementById("voiceOutput");
     const conversationMode = document.getElementById("conversationMode");
 
@@ -59,6 +63,15 @@ document.addEventListener("DOMContentLoaded", function () {
     translateViewSettingsButton.addEventListener("click", function () {
         showSettings();
     });
+
+    const homeButton = document.getElementById("homeButton");
+    homeButton.addEventListener("click", function () {
+        document.getElementById("translationContainer").style.display = 'none';
+        document.getElementById("introContainer").style.display = 'flex';
+    });
+
+    languageOptionDisplay.textContent = languageOptions.selectedOptions[0].textContent;
+    languageTargetDisplay.textContent = languageTargetOptions.selectedOptions[0].textContent;
 });
 
 function Initialize(onComplete) {
@@ -106,7 +119,7 @@ function getSpeechConfig(sdkConfigType, detectedLanguage = undefined, newTargetL
 function onRecognizing(sender, recognitionEventArgs) {
     if (sender.speechRecognitionLanguage !== speechRecognitionLanguage) return;
     const result = recognitionEventArgs.result;
-    if (result.text) detected.innerHTML = detected.innerHTML.replace(/(.*)(^|[\r\n]+).*\[\.\.\.\][\r\n]+/, '$1$2')
+    if (result.text) detected.textContent = detected.textContent.replace(/(.*)(^|[\r\n]+).*\[\.\.\.\][\r\n]+/, '$1$2')
         + `${result.text} [...]\r\n`;
 }
 
@@ -119,7 +132,7 @@ function onRecognized(sender, recognitionEventArgs) {
 function onRecognizedResult(result) {
     detected.scrollTop = detected.scrollHeight;
 
-    if (result.text) detected.innerHTML = detected.innerHTML.replace(/(.*)(^|[\r\n]+).*\[\.\.\.\][\r\n]+/, '$1$2')
+    if (result.text) detected.textContent = detected.textContent.replace(/(.*)(^|[\r\n]+).*\[\.\.\.\][\r\n]+/, '$1$2')
         + `${result.text} [...]\r\n`;
 
     switch (result.reason) {
@@ -132,14 +145,14 @@ function onRecognizedResult(result) {
         case SpeechSDK.ResultReason.RecognizedSpeech:
         case SpeechSDK.ResultReason.TranslatedSpeech:
             if (result.text) {
-                detected.innerHTML = `${result.text}\r\n`;
+                detected.textContent = `${result.text}\r\n`;
             }
 
             if (result.translations) {
                 const resultJson = JSON.parse(result.json);
                 resultJson['privTranslationPhrase']['Translation']['Translations'].forEach(
                     function (translation) {
-                    translated.innerHTML = `${translation.Text}\r\n`;
+                    translated.textContent = `${translation.Text}\r\n`;
                 });
             }
             break;
@@ -257,7 +270,7 @@ function doContinuousTranslation(detectedLanguage = undefined, newTargetLanguage
                 console.log("detectedLanguage", detectedLanguage);
                 if (speechRecognitionLanguage && detectedLanguage !== speechRecognitionLanguage) {
                     if (!(translationRecognizer1 && translationRecognizer2)) {
-                        console.error("missing recos for automatic switching");
+                        console.error("missing translationRecognizers for automatic switching");
                         return;
                     }
 
@@ -291,15 +304,22 @@ function startContinuousTranslation() {
 function stopContinuousTranslation() {
     console.log("stopContinuousTranslation");
     if (!activeTranslationRecognizer) return;
-    activeTranslationRecognizer.stopContinuousRecognitionAsync(
+    translationRecognizer1.stopContinuousRecognitionAsync(
         function () {
             translationRecognizer1.close();
-            translationRecognizer2.close();
             activeTranslationRecognizer = undefined;
             translationRecognizer1 = undefined;
-            translationRecognizer2 = undefined;
         }
     );
+
+    if (translationRecognizer2) {
+        translationRecognizer2.stopContinuousRecognitionAsync(
+            function () {
+                translationRecognizer2.close();
+                translationRecognizer2 = undefined;
+            }
+        );
+    }
     isListening = false;
 }
 

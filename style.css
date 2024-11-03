@@ -10,6 +10,12 @@
 	initial-value: #ffe400;
 }
 
+@property --primary-link-color {
+	syntax: "<color>";
+	inherits: false;
+	initial-value: #fffaaa;
+}
+
 @property --secondary-fg-color {
 	syntax: "<color>";
 	inherits: false;
@@ -70,12 +76,21 @@ body {
 	height: 2vh;
 }
 
-#signOutButton {
+button {
+	font-family: "Times New Roman", Times, serif;
+	color: var(--primary-link-color);
 	font-size: 1em;
 	cursor: pointer;
+	border: none;
+    background-color: transparent;
+    outline: none;
 }
 
-#signOutButton:hover {
+button:focus {
+    border: none;
+}
+
+button:hover {
 	color: var(--secondary-fg-color);
 }
 
@@ -85,14 +100,6 @@ body {
 	font-size: 2em;
 	flex-direction: row;
 	justify-content: space-evenly;
-}
-
-#settingsButton, #settingsCloseButton, #start  {
-	cursor: pointer;
-}
-
-#settingsButton:hover, #start:hover  {
-	color: var(--secondary-fg-color);
 }
 
 #settingsModal {
@@ -160,8 +167,7 @@ select {
 }
 
 #settingsCloseButton {
-	display: flex;
-    align-items: center;
+	color: #555;
 	font-size: 1.2em;
 	padding: 4vh 0 4vh 0;
 }
@@ -174,7 +180,11 @@ select {
 	color: #FFF;
 }
 
-#displayContainer {
+#languageSelectionDisplay {
+	display: flex;
+}
+
+#translationDisplayContainer {
 	display: flex;
 	width: 100vw;
 	height: 92vh;
@@ -186,7 +196,7 @@ select {
 	margin: 12px;
 }
 
-.textContainer {
+.translationTextContainer {
 	color: var(--primary-fg-color);
 	font-size: calc(4vw + 4vh + 2vmin);
 	text-align: center;

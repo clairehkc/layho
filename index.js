@@ -51,7 +51,7 @@ function checkSignedIn() {
 }
 
 function onSignIn(name) {
-    document.getElementById("nameText").innerHTML = name;
+    document.getElementById("nameText").textContent = name;
     document.getElementById("settingsStartButtonContainer").style.visibility = 'visible';
     document.getElementById("signOutButton").style.display = 'flex';
 }
@@ -61,7 +61,7 @@ function onSignOut() {
     apiKey = undefined;
     document.getElementById("signOutButton").style.display = 'none';
     document.getElementById("signInButton").style.display = 'flex';
-    document.getElementById("nameText").innerHTML = "";
+    document.getElementById("nameText").textContent = "";
     document.getElementById("settingsStartButtonContainer").style.visibility = 'hidden';
 }
 
@@ -86,25 +86,25 @@ window.onload = function () {
     );
 
     const signOutButton = document.getElementById("signOutButton");
-    signOutButton.onclick = () => {
+    signOutButton.addEventListener("click", function () {
         onSignOut();
-    };
+    });
 
     const settingsButton = document.getElementById("settingsButton");
-    settingsButton.onclick = () => {
+    settingsButton.addEventListener("click", function () {
         showSettings();
-    };
+    });
 
     const settingsCloseButton = document.getElementById("settingsCloseButton");
-    settingsCloseButton.onclick = () => {
+    settingsCloseButton.addEventListener("click", function () {
         closeSettings();
-    };
+    });
 
-    const start = document.getElementById("start");
-    start.onclick= () => {
+    const startAppButton = document.getElementById("startAppButton");
+    startAppButton.addEventListener("click", function () {
         document.getElementById("introContainer").style.display = 'none';
         document.getElementById("translationContainer").style.display = 'block';
-    };
+    });
 
     checkSignedIn();
 }
