@@ -15,7 +15,6 @@ async function fetchApiKey(token) {
 
         const json = await response.json();
 
-        console.log("res", json);
         if (json.statusCode === 200) {
             onSignIn(json.body.name);
             apiKey = json.body.key;
@@ -30,7 +29,6 @@ async function fetchApiKey(token) {
 }
 
 function handleCredentialResponse(response) {
-    console.log("Encoded JWT ID token: " + response.credential);
     document.cookie = `${signInCookieName}=${response.credential}; SameSite=None; Secure`;
     fetchApiKey(response.credential);
     document.getElementById("signInButton").style.display = 'none';
@@ -42,7 +40,7 @@ function checkSignedIn() {
         .split("; ")
         .find((row) => row.startsWith(`${signInCookieName}=`))
         ?.split("=")[1];
-    console.log("savedToken", savedToken);
+
     if (savedToken) {
         fetchApiKey(savedToken);
     } else {
