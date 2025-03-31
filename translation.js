@@ -6,6 +6,7 @@ let SpeechSDK;
 let startButton, stopButton;
 let isListening = false;
 let speechRecognitionLanguage;
+let targetLanguage;
 let activeTranslationRecognizer;
 let translationRecognizer1;
 let translationRecognizer2;
@@ -37,10 +38,10 @@ document.addEventListener("DOMContentLoaded", function () {
     detected = document.getElementById("detected");
     translated = document.getElementById("translated");
 
-    const inputLanguageOptions = document.getElementById("inputLanguageOptions");
+    const speechRecognitionLanguageOptions = document.getElementById("speechRecognitionLanguageOptions");
     const targetLanguageOptions = document.getElementById("targetLanguageOptions");
 
-    const inputLanguageDisplay =  document.getElementById("inputLanguageDisplay");
+    const speechRecognitionLanguageDisplay =  document.getElementById("speechRecognitionLanguageDisplay");
     const targetLanguageDisplay =  document.getElementById("targetLanguageDisplay");
     const switchLanguageButton = document.getElementById("switchLanguageButton");
 
@@ -50,7 +51,6 @@ document.addEventListener("DOMContentLoaded", function () {
     startButton.addEventListener("click", function () {
         startContinuousTranslation();
     });
-
     stopButton.addEventListener("click", function() {
         stopContinuousTranslation();
     });
@@ -74,7 +74,24 @@ document.addEventListener("DOMContentLoaded", function () {
         document.getElementById("introContainer").style.display = 'flex';
     });
 
-    inputLanguageDisplay.textContent = inputLanguageOptions.selectedOptions[0].textContent;
+    document.addEventListener('keydown', (event) => {
+        if (event.key === "s") {
+            if (!isListening) {
+                onStartKeyPress();
+            } else {
+                onStopKeyPress();
+            }
+        }
+    });
+
+    speechRecognitionLanguageOptions.addEventListener('change', (event) =>  {
+        speechRecognitionLanguageDisplay.textContent = speechRecognitionLanguageOptions.selectedOptions[0].textContent;
+    });
+
+    targetLanguageOptions.addEventListener('change', (event) =>  {
+        targetLanguageDisplay.textContent = targetLanguageOptions.selectedOptions[0].textContent;
+    })
+    speechRecognitionLanguageDisplay.textContent = speechRecognitionLanguageOptions.selectedOptions[0].textContent;
     targetLanguageDisplay.textContent = targetLanguageOptions.selectedOptions[0].textContent;
 });
 
@@ -101,7 +118,8 @@ function getSpeechConfig(sdkConfigType, detectedLanguage = undefined, newTargetL
     // Multiple languages can be specified for text translation and will be returned in a map.
     if (sdkConfigType == SpeechSDK.SpeechTranslationConfig) {
         const selectedTargetLanguage = targetLanguageOptions.value;
-        const targetLanguage = newTargetLanguage || selectedTargetLanguage.substring(0, 5);
+        targetLanguage = newTargetLanguage || selectedTargetLanguage.substring(0, 5);
+        targetLanguageDisplay.textContent = targetLanguage;
         speechConfig.addTargetLanguage(targetLanguage);
         console.log("target language:", targetLanguage);
         
@@ -114,9 +132,10 @@ function getSpeechConfig(sdkConfigType, detectedLanguage = undefined, newTargetL
         }
     }
 
-    speechConfig.speechRecognitionLanguage = detectedLanguage || inputLanguageOptions.value;
+    speechConfig.speechRecognitionLanguage = detectedLanguage || speechRecognitionLanguageOptions.value;
     speechRecognitionLanguage = speechConfig.speechRecognitionLanguage;
-    console.log("recognition language:", inputLanguageOptions.value);
+    speechRecognitionLanguageDisplay.textContent = speechRecognitionLanguage;
+    console.log("recognition language:", speechRecognitionLanguage);
     return speechConfig;
 }
 
@@ -217,7 +236,7 @@ function applyCommonConfigurationTo(recognizer) {
 }
 
 function doContinuousTranslation(detectedLanguage = undefined, newTargetLanguage = undefined, newTranslationVoice = undefined) {
-    console.log("doContinuousTranslation", detectedLanguage);
+    console.log("doContinuousTranslation", detectedLanguage, newTargetLanguage);
     if (!apiKey) {
         console.error('no apiKey');
         return undefined;
@@ -287,8 +306,6 @@ function doContinuousTranslation(detectedLanguage = undefined, newTargetLanguage
                         activeTranslationRecognizer = translationRecognizer1;
                         console.log("set translationRecognizer1");
                     }
-
-
                 }
             }
         }
@@ -296,8 +313,8 @@ function doContinuousTranslation(detectedLanguage = undefined, newTargetLanguage
     return activeTranslationRecognizer;
 }
 
-function startContinuousTranslation() {
-    translationRecognizer1 = doContinuousTranslation();
+function startContinuousTranslation(speechRecognitionLanguage, newTargetLanguage) {
+    translationRecognizer1 = doContinuousTranslation(speechRecognitionLanguage, newTargetLanguage);
     if (conversationMode.checked) {
         translationRecognizer2 = doContinuousTranslation("en-US", "yue", "zh-HK-HiuMaanNeural");
         speechRecognitionLanguage = "zh-HK";
@@ -328,7 +345,14 @@ function stopContinuousTranslation() {
 }
 
 function switchActiveLanguages() {
-    
+    translationRecognizer1.stopContinuousRecognitionAsync(
+        function () {
+            translationRecognizer1.close();
+            activeTranslationRecognizer = undefined;
+            translationRecognizer1 = undefined;
+            startContinuousTranslation(targetLanguage, speechRecognitionLanguage);
+        }
+    );
 }
 
 function onStartKeyPress() {
@@ -338,13 +362,3 @@ function onStartKeyPress() {
 function onStopKeyPress() {
     stopContinuousTranslation();
 }
-
-document.addEventListener('keydown', (e) => {
-    if (e.key === "s") {
-        if (!isListening) {
-            onStartKeyPress();
-        } else {
-            onStopKeyPress();
-        }
-    }
-});
