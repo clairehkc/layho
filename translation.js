@@ -37,12 +37,12 @@ document.addEventListener("DOMContentLoaded", function () {
     detected = document.getElementById("detected");
     translated = document.getElementById("translated");
 
-    const languageOptions = document.getElementById("languageOptions");
-    const languageTargetOptions = document.getElementById("languageTargetOptions");
+    const inputLanguageOptions = document.getElementById("inputLanguageOptions");
+    const targetLanguageOptions = document.getElementById("targetLanguageOptions");
 
-    const languageOptionDisplay =  document.getElementById("languageOptionDisplay");
-    const languageTargetDisplay =  document.getElementById("languageTargetDisplay");
-    const languageSwitchButton = document.getElementById("languageSwitchButton");
+    const inputLanguageDisplay =  document.getElementById("inputLanguageDisplay");
+    const targetLanguageDisplay =  document.getElementById("targetLanguageDisplay");
+    const switchLanguageButton = document.getElementById("switchLanguageButton");
 
     const voiceOutput = document.getElementById("voiceOutput");
     const conversationMode = document.getElementById("conversationMode");
@@ -53,6 +53,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
     stopButton.addEventListener("click", function() {
         stopContinuousTranslation();
+    });
+
+    switchLanguageButton.addEventListener("click", function() {
+        switchActiveLanguages();
     });
 
     Initialize(async function (speechSdk) {
@@ -70,8 +74,8 @@ document.addEventListener("DOMContentLoaded", function () {
         document.getElementById("introContainer").style.display = 'flex';
     });
 
-    languageOptionDisplay.textContent = languageOptions.selectedOptions[0].textContent;
-    languageTargetDisplay.textContent = languageTargetOptions.selectedOptions[0].textContent;
+    inputLanguageDisplay.textContent = inputLanguageOptions.selectedOptions[0].textContent;
+    targetLanguageDisplay.textContent = targetLanguageOptions.selectedOptions[0].textContent;
 });
 
 function Initialize(onComplete) {
@@ -96,7 +100,7 @@ function getSpeechConfig(sdkConfigType, detectedLanguage = undefined, newTargetL
     // Defines the language(s) that speech should be translated to.
     // Multiple languages can be specified for text translation and will be returned in a map.
     if (sdkConfigType == SpeechSDK.SpeechTranslationConfig) {
-        const selectedTargetLanguage = languageTargetOptions.value;
+        const selectedTargetLanguage = targetLanguageOptions.value;
         const targetLanguage = newTargetLanguage || selectedTargetLanguage.substring(0, 5);
         speechConfig.addTargetLanguage(targetLanguage);
         console.log("target language:", targetLanguage);
@@ -110,9 +114,9 @@ function getSpeechConfig(sdkConfigType, detectedLanguage = undefined, newTargetL
         }
     }
 
-    speechConfig.speechRecognitionLanguage = detectedLanguage || languageOptions.value;
+    speechConfig.speechRecognitionLanguage = detectedLanguage || inputLanguageOptions.value;
     speechRecognitionLanguage = speechConfig.speechRecognitionLanguage;
-    console.log("recognition language:", languageOptions.value);
+    console.log("recognition language:", inputLanguageOptions.value);
     return speechConfig;
 }
 
@@ -150,7 +154,7 @@ function onRecognizedResult(result) {
 
             if (result.translations) {
                 const resultJson = JSON.parse(result.json);
-                resultJson['privTranslationPhrase']['Translation']['Translations'].forEach(
+                resultJson['Translation']['Translations'].forEach(
                     function (translation) {
                     translated.textContent = `${translation.Text}\r\n`;
                 });
@@ -321,6 +325,10 @@ function stopContinuousTranslation() {
         );
     }
     isListening = false;
+}
+
+function switchActiveLanguages() {
+    
 }
 
 function onStartKeyPress() {
