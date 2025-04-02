@@ -1,0 +1,142 @@
+{
+	"ar-EG": {
+		"displayName": "Arabic - EG",
+		"voiceName": "ar-EG-SalmaNeural"
+	},
+	"my-MM": {
+		"displayName": "Burmese - MM",
+		"voiceName": "my-MM-NilarNeural"
+	},
+	"ca-ES": {
+		"displayName": "Catalan - ES",
+		"voiceName": "ca-ES-AlbaNeural"
+	},
+	"zh-CN": {
+		"displayName": "Chinese - CN",
+		"voiceName": "zh-CN-XiaohanNeural"
+	},
+	"zh-HK": {
+		"displayName": "Chinese - HK",
+		"voiceName": "zh-HK-HiuGaaiNeural"
+	},
+	"zh-TW": {
+		"displayName": "Chinese - TW",
+		"voiceName": "zh-TW-YunJheNeural"
+	},
+	"da-DK": {
+		"displayName": "Danish - DK",
+		"voiceName": "da-DK-JeppeNeura"
+	},
+	"nl-NL": {
+		"displayName": "Dutch - NL",
+		"voiceName": "nl-NL-ColetteNeural"
+	},
+	"en-AU": {
+		"displayName": "English - AU",
+		"voiceName": "en-AU-NatashaNeural"
+	},
+	"en-GB": {
+		"displayName": "English - GB",
+		"voiceName": "en-GB-NoahNeural"
+	},
+	"en-US": {
+		"displayName": "English - US",
+		"voiceName": "en-US-AvaMultilingualNeural"
+	},
+	"fil-PH": {
+		"displayName": "Filipino - PH",
+		"voiceName": "fil-PH-BlessicaNeural"
+	},
+	"de-DE": {
+		"displayName": "German - DE",
+		"voiceName": "de-DE-BerndNeural"
+	},
+	"es-ES": {
+		"displayName": "Spanish - ES",
+		"voiceName": "es-ES-ElviraNeural"
+	},
+	"es-MX": {
+		"displayName": "Spanish - MX",
+		"voiceName": "es-MX-LibertoNeural"
+	},
+	"fi-FI": {
+		"displayName": "Finnish - FI",
+		"voiceName": "fi-FI-HarriNeural"
+	},
+	"fr-CA": {
+		"displayName": "French - CA",
+		"voiceName": "fr-CA-JeanNeural"
+	},
+	"fr-FR": {
+		"displayName": "French - FR",
+		"voiceName": "fr-FR-ClaudeNeural"
+	},
+	"hi-IN": {
+		"displayName": "Hindi - IN",
+		"voiceName": "hi-IN-MadhurNeural"
+	},
+	"id-ID": {
+		"displayName": "Indonesian - ID",
+		"voiceName": "id-ID-GadisNeural"
+	},
+	"it-IT": {
+		"displayName": "Italian - IT",
+		"voiceName": "it-IT-CataldoNeural"
+	},
+	"ja-JP": {
+		"displayName": "Japanese - JP",
+		"voiceName": "ja-JP-KeitaNeural"
+	},
+	"km-KH": {
+		"displayName": "Khmer - KH",
+		"voiceName": "km-KH-SreymomNeural"
+	},
+	"ko-KR": {
+		"displayName": "Korean - KR",
+		"voiceName": "ko-KR-InJoonNeural"
+	},
+	"nb-NO": {
+		"displayName": "Norwegian - NO",
+		"voiceName": "nb-NO-FinnNeural"
+	},
+	"pl-PL": {
+		"displayName": "Polish - PL",
+		"voiceName": "pl-PL-ZofiaNeural"
+	},
+	"pt-BR": {
+		"displayName": "Portuguese - BR",
+		"voiceName": "pt-BR-BrendaNeural"
+	},
+	"pt-PT": {
+		"displayName": "Portuguese - PT",
+		"voiceName": "pt-PT-RaquelNeural"
+	},
+	"ru-RU": {
+		"displayName": "Russian - RU",
+		"voiceName": "ru-RU-DmitryNeural"
+	},
+	"sv-SE": {
+		"displayName": "Swedish - SE",
+		"voiceName": "sv-SE-HilleviNeural"
+	},
+	"th-TH": {
+		"displayName": "Thai - TH",
+		"voiceName": "th-TH-PremwadeeNeural"
+	},
+	"vi-VN": {
+		"displayName": "Vietnamese - VN",
+		"voiceName": "vi-VN-HoaiMyNeural"
+	}
+}
+
+							
+								
+							
+								
+								
+							
+								
+						
+								
+								
+			

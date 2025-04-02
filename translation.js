@@ -72,6 +72,7 @@ document.addEventListener("DOMContentLoaded", function () {
     homeButton.addEventListener("click", function () {
         document.getElementById("translationContainer").style.display = 'none';
         document.getElementById("introContainer").style.display = 'flex';
+        closeSettings();
     });
 
     document.addEventListener('keydown', (event) => {
