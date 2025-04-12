@@ -10,6 +10,8 @@ let targetLanguage;
 let activeTranslationRecognizer;
 let translationRecognizer1;
 let translationRecognizer2;
+let speechRecognitionLanguageOptions;
+let targetLanguageOptions;
 
 let soundContext = undefined;
 try {
@@ -31,15 +33,51 @@ function resetUiForScenarioStart() {
     translated.textContent = "";
 }
 
+async function populateLanguageOptions() {
+    const response = await fetch("LanguageOptions.json");
+    const options = await response.json();
+    console.log(options);
+
+    const keys = Object.keys(options);
+    console.log(keys);
+
+    speechRecognitionLanguageOptions = document.getElementById("speechRecognitionLanguageOptions");
+    targetLanguageOptions = document.getElementById("targetLanguageOptions");
+    
+    for (const key of keys) {
+        const recognitionOption = document.createElement('option');
+        recognitionOption.value = key;
+        recognitionOption.innerHTML = options[key].displayName;
+        speechRecognitionLanguageOptions.appendChild(recognitionOption);
+
+        const targetOption = document.createElement('option');
+        targetOption.value = options[key].voiceName;
+        targetOption.innerHTML = options[key].displayName;
+        targetLanguageOptions.appendChild(targetOption);
+    }
+
+    speechRecognitionLanguageOptions.value = "zh-HK";
+    targetLanguageOptions.value = "en-US-AvaMultilingualNeural";
+
+    speechRecognitionLanguageOptions.addEventListener('change', (event) =>  {
+        speechRecognitionLanguageDisplay.textContent = speechRecognitionLanguageOptions.selectedOptions[0].textContent;
+    });
+
+    targetLanguageOptions.addEventListener('change', (event) =>  {
+        targetLanguageDisplay.textContent = targetLanguageOptions.selectedOptions[0].textContent;
+    })
+    speechRecognitionLanguageDisplay.textContent = speechRecognitionLanguageOptions.selectedOptions[0].textContent;
+    targetLanguageDisplay.textContent = targetLanguageOptions.selectedOptions[0].textContent;
+}
+
 document.addEventListener("DOMContentLoaded", function () {
+    populateLanguageOptions();
+
     startButton = document.getElementById('startButton');
     stopButton = document.getElementById('stopButton');
 
     detected = document.getElementById("detected");
     translated = document.getElementById("translated");
-
-    const speechRecognitionLanguageOptions = document.getElementById("speechRecognitionLanguageOptions");
-    const targetLanguageOptions = document.getElementById("targetLanguageOptions");
 
     const speechRecognitionLanguageDisplay =  document.getElementById("speechRecognitionLanguageDisplay");
     const targetLanguageDisplay =  document.getElementById("targetLanguageDisplay");
@@ -84,16 +122,6 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         }
     });
-
-    speechRecognitionLanguageOptions.addEventListener('change', (event) =>  {
-        speechRecognitionLanguageDisplay.textContent = speechRecognitionLanguageOptions.selectedOptions[0].textContent;
-    });
-
-    targetLanguageOptions.addEventListener('change', (event) =>  {
-        targetLanguageDisplay.textContent = targetLanguageOptions.selectedOptions[0].textContent;
-    })
-    speechRecognitionLanguageDisplay.textContent = speechRecognitionLanguageOptions.selectedOptions[0].textContent;
-    targetLanguageDisplay.textContent = targetLanguageOptions.selectedOptions[0].textContent;
 });
 
 function Initialize(onComplete) {
