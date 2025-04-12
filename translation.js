@@ -36,14 +36,11 @@ function resetUiForScenarioStart() {
 async function populateLanguageOptions() {
     const response = await fetch("LanguageOptions.json");
     const options = await response.json();
-    console.log(options);
-
     const keys = Object.keys(options);
-    console.log(keys);
 
     speechRecognitionLanguageOptions = document.getElementById("speechRecognitionLanguageOptions");
     targetLanguageOptions = document.getElementById("targetLanguageOptions");
-    
+
     for (const key of keys) {
         const recognitionOption = document.createElement('option');
         recognitionOption.value = key;

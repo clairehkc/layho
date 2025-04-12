@@ -13,13 +13,13 @@
 @property --primary-link-color {
 	syntax: "<color>";
 	inherits: false;
-	initial-value: #fffaaa;
+	initial-value: #fffacc;
 }
 
-@property --secondary-fg-color {
+@property --secondary-link-color {
 	syntax: "<color>";
 	inherits: false;
-	initial-value: #124eff;
+	initial-value: #2058ff;
 }
 
 body {
@@ -72,10 +72,6 @@ body {
 	font-size: 3em;
 }
 
-#signInOutContainer, #signInButton, #signOutButton {
-	height: 2vh;
-}
-
 button {
 	font-family: "Times New Roman", Times, serif;
 	color: var(--primary-link-color);
@@ -83,7 +79,10 @@ button {
 	cursor: pointer;
 	border: none;
     background-color: transparent;
-    outline: none;
+	outline-style: solid;
+	outline-width: 2px;
+	padding: 6px 8px 6px 8px;
+	border-radius: 10px;
 }
 
 button:focus {
@@ -91,8 +90,26 @@ button:focus {
 }
 
 button:hover {
-	color: var(--secondary-fg-color);
+	color: var(--secondary-link-color);
 }
+
+/* .iconButton {
+	width: 48px;
+	height: 48px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+    outline: none;
+}
+
+.icon {
+	width: 32px;
+	height: 32px;
+}
+
+.signOutIcon {
+	background: url(icons/sign-out.png) no-repeat;
+} */
 
 #settingsStartButtonContainer {
 	height: 4vh;
@@ -167,13 +184,12 @@ select {
 }
 
 #settingsCloseButton {
-	color: #555;
+	color: #6f93ff;
 	font-size: 1.2em;
-	padding: 4vh 0 4vh 0;
 }
 
 #settingsCloseButton:hover  {
-	color: var(--secondary-fg-color);
+	color: var(--secondary-link-color);
 }
 
 #controlsContainer {
