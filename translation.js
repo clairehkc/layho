@@ -107,10 +107,14 @@ function getSpeechConfig(sdkConfigType, detectedLanguage = undefined, newTargetL
     // Multiple languages can be specified for text translation and will be returned in a map.
     if (sdkConfigType == SpeechSDK.SpeechTranslationConfig) {
         const selectedTargetLanguage = targetLanguageOptions.value;
-        targetLanguage = newTargetLanguage || selectedTargetLanguage.substring(0, 5);
-        targetLanguageDisplay.textContent = targetLanguage;
-        speechConfig.addTargetLanguage(targetLanguage);
-        console.log("target language:", targetLanguage);
+        targetLanguage = newTargetLanguage || selectedTargetLanguage;
+
+        // only specify the language code that precedes the locale dash (-) separator
+        const targetLanguageCode = targetLanguage.match(/.*(?=-)/)[0];
+
+        targetLanguageDisplay.textContent = targetLanguageCode;
+        speechConfig.addTargetLanguage(targetLanguageCode);
+        console.log("target language:", targetLanguageCode);
         
 
         // If voice output is requested, set the target voice.
@@ -339,6 +343,7 @@ function switchActiveLanguages() {
             translationRecognizer1.close();
             activeTranslationRecognizer = undefined;
             translationRecognizer1 = undefined;
+            // TODO: fix language code formatting here
             startContinuousTranslation(targetLanguage, speechRecognitionLanguage);
         }
     );
