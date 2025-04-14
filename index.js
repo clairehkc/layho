@@ -63,14 +63,6 @@ function onSignOut() {
     document.getElementById("settingsStartButtonContainer").style.visibility = 'hidden';
 }
 
-function showSettings() {
-    document.getElementById("settingsModal").style.display = 'flex';
-}
-
-function closeSettings() {
-    document.getElementById("settingsModal").style.display = 'none';
-}
-
 window.onload = function () {
     const client_id = "699001412765-r6d8ck46h18u9uk7b4dlddncospqcci1.apps.googleusercontent.com";
 
@@ -82,7 +74,9 @@ window.onload = function () {
         document.getElementById("signInButton"),
         { theme: "outline", size: "large" }  // customization attributes
     );
+}
 
+document.addEventListener("DOMContentLoaded", function () {
     const signOutButton = document.getElementById("signOutButton");
     signOutButton.addEventListener("click", function () {
         onSignOut();
@@ -93,11 +87,6 @@ window.onload = function () {
         showSettings();
     });
 
-    const settingsCloseButton = document.getElementById("settingsCloseButton");
-    settingsCloseButton.addEventListener("click", function () {
-        closeSettings();
-    });
-
     const startAppButton = document.getElementById("startAppButton");
     startAppButton.addEventListener("click", function () {
         document.getElementById("introContainer").style.display = 'none';
@@ -105,4 +94,5 @@ window.onload = function () {
     });
 
     checkSignedIn();
-}
+});
+

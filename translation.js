@@ -1,19 +1,21 @@
 // extended from https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/samples/js/browser
 
 const region = "westus";
+
 let apiKey;
 let SpeechSDK;
-let startButton, stopButton;
-let isListening = false;
+
 let speechRecognitionLanguage;
 let targetLanguage;
+
 let activeTranslationRecognizer;
 let translationRecognizer1;
 let translationRecognizer2;
-let speechRecognitionLanguageOptions;
-let targetLanguageOptions;
-
 let soundContext = undefined;
+
+let startButton, stopButton;
+let isListening = false;
+
 try {
     let AudioContext = window.AudioContext // our preferred impl
         || window.webkitAudioContext       // fallback, mostly when on Safari
@@ -33,45 +35,9 @@ function resetUiForScenarioStart() {
     translated.textContent = "";
 }
 
-async function populateLanguageOptions() {
-    const response = await fetch("LanguageOptions.json");
-    const options = await response.json();
-    const keys = Object.keys(options);
-
-    speechRecognitionLanguageOptions = document.getElementById("speechRecognitionLanguageOptions");
-    targetLanguageOptions = document.getElementById("targetLanguageOptions");
-
-    for (const key of keys) {
-        const recognitionOption = document.createElement('option');
-        recognitionOption.value = key;
-        recognitionOption.innerHTML = options[key].displayName;
-        speechRecognitionLanguageOptions.appendChild(recognitionOption);
-
-        const targetOption = document.createElement('option');
-        targetOption.value = options[key].voiceName;
-        targetOption.innerHTML = options[key].displayName;
-        targetLanguageOptions.appendChild(targetOption);
-    }
-
-    speechRecognitionLanguageOptions.value = "zh-HK";
-    targetLanguageOptions.value = "en-US-AvaMultilingualNeural";
-
-    speechRecognitionLanguageOptions.addEventListener('change', (event) =>  {
-        speechRecognitionLanguageDisplay.textContent = speechRecognitionLanguageOptions.selectedOptions[0].textContent;
-    });
-
-    targetLanguageOptions.addEventListener('change', (event) =>  {
-        targetLanguageDisplay.textContent = targetLanguageOptions.selectedOptions[0].textContent;
-    })
-    speechRecognitionLanguageDisplay.textContent = speechRecognitionLanguageOptions.selectedOptions[0].textContent;
-    targetLanguageDisplay.textContent = targetLanguageOptions.selectedOptions[0].textContent;
-}
-
 document.addEventListener("DOMContentLoaded", function () {
-    populateLanguageOptions();
-
-    startButton = document.getElementById('startButton');
-    stopButton = document.getElementById('stopButton');
+    startButton = document.getElementById("startButton");
+    stopButton = document.getElementById("stopButton");
 
     detected = document.getElementById("detected");
     translated = document.getElementById("translated");
@@ -79,9 +45,6 @@ document.addEventListener("DOMContentLoaded", function () {
     const speechRecognitionLanguageDisplay =  document.getElementById("speechRecognitionLanguageDisplay");
     const targetLanguageDisplay =  document.getElementById("targetLanguageDisplay");
     const switchLanguageButton = document.getElementById("switchLanguageButton");
-
-    const voiceOutput = document.getElementById("voiceOutput");
-    const conversationMode = document.getElementById("conversationMode");
 
     startButton.addEventListener("click", function () {
         startContinuousTranslation();
@@ -110,7 +73,7 @@ document.addEventListener("DOMContentLoaded", function () {
         closeSettings();
     });
 
-    document.addEventListener('keydown', (event) => {
+    document.addEventListener("keydown", (event) => {
         if (event.key === "s") {
             if (!isListening) {
                 onStartKeyPress();
@@ -152,7 +115,7 @@ function getSpeechConfig(sdkConfigType, detectedLanguage = undefined, newTargetL
 
         // If voice output is requested, set the target voice.
         // If multiple text translations were requested, only the first one added will have audio synthesised for it.
-        if (voiceOutput.checked) {
+        if (voiceOutputInput.checked) {
             const translationVoice = newTranslationVoice || selectedTargetLanguage;
             speechConfig.setProperty(SpeechSDK.PropertyId.SpeechServiceConnection_TranslationVoice, translationVoice);
         }
@@ -301,7 +264,7 @@ function doContinuousTranslation(detectedLanguage = undefined, newTargetLanguage
     // Start the continuous recognition/translation operation.
     activeTranslationRecognizer.startContinuousRecognitionAsync();
 
-    if (conversationMode.checked) {
+    if (conversationModeInput.checked) {
         // continuous language recognition and automatic switching
         const speechRecognitionConfig = SpeechSDK.SpeechConfig.fromEndpoint(new URL(`wss://${region}.stt.speech.microsoft.com/speech/universal/v2`), apiKey);
         speechRecognitionConfig.setProperty(SpeechSDK.PropertyId.SpeechServiceConnection_LanguageIdMode, "Continuous")
@@ -341,7 +304,7 @@ function doContinuousTranslation(detectedLanguage = undefined, newTargetLanguage
 
 function startContinuousTranslation(speechRecognitionLanguage, newTargetLanguage) {
     translationRecognizer1 = doContinuousTranslation(speechRecognitionLanguage, newTargetLanguage);
-    if (conversationMode.checked) {
+    if (conversationModeInput.checked) {
         translationRecognizer2 = doContinuousTranslation("en-US", "yue", "zh-HK-HiuMaanNeural");
         speechRecognitionLanguage = "zh-HK";
         activeTranslationRecognizer = translationRecognizer1;
@@ -387,4 +350,14 @@ function onStartKeyPress() {
 
 function onStopKeyPress() {
     stopContinuousTranslation();
+}
+
+function restartContinuousTranslation() {
+    if (!isListening) return;
+    translationRecognizer1.stopContinuousRecognitionAsync(
+        function () {
+            translationRecognizer1.close();
+            startContinuousTranslation();
+        }
+    );
 }

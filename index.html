@@ -40,9 +40,9 @@
 						<div class="setting">
 							<div class="settingTitle">Output</div>
 							<div class="settingOption">
-								<label for="voiceOutput" class="settingOptionLabel">Voice</label>
+								<label for="voiceOutputInput" class="settingOptionLabel">Voice</label>
 								<label class="switch">
-									<input id="voiceOutput" type="checkbox">
+									<input id="voiceOutputInput" type="checkbox">
 									<span class="slider"></span>
 								</label>
 							</div>
@@ -50,15 +50,18 @@
 						<div class="setting">
 							<div class="settingTitle">Mode</div>
 							<div class="settingOption">
-								<label for="conversationMode" class="settingOptionLabel">Conversation</label>
+								<label for="conversationModeInput" class="settingOptionLabel">Conversation</label>
 								<label class="switch">
-									<input id="conversationMode" type="checkbox">
+									<input id="conversationModeInput" type="checkbox">
 									<span class="slider"></span>
 								</label>
 							</div>
 						</div>
 					</div>
-					<button id="settingsCloseButton">Close</button>
+					<div id="settingsFooter">
+						<button id="settingsSaveButton" class="settingsFooterButton disabled">Save</button>
+						<button id="settingsCloseButton" class="settingsFooterButton">Close</button>
+					</div>
 				</div>
 			</div>
 		</div>
@@ -87,6 +90,7 @@
 	<script src="https://aka.ms/csspeech/jsbrowserpackageraw"></script>
 
 	<script src="https://accounts.google.com/gsi/client" async></script>
+	<script src="./Settings.js"></script>
 	<script src="./index.js"></script>
 	<script src="./Translation.js"></script>
 </body>
