@@ -6,10 +6,8 @@ let conversationModeInput;
 let settingsList;
 let savedSettingsValues;
 
-let settingsSaveButton;
-
-function updatedSavedSettingsValues() {
-    savedSettingsValues = [
+function getSelectedSettingsValues() {
+    return [
         speechRecognitionLanguageOptions.value,
         targetLanguageOptions.value,
         voiceOutputInput.checked,
@@ -17,47 +15,35 @@ function updatedSavedSettingsValues() {
     ];
 }
 
-function showSettings() {
-    document.getElementById("settingsModal").style.display = 'flex';
-    updatedSavedSettingsValues();
+function updateSavedSettingsValues() {
+    savedSettingsValues = getSelectedSettingsValues();
 }
 
-function closeSettings() {
-    document.getElementById("settingsModal").style.display = 'none';
-}
-
-function checkShouldshowSettingsSaveButton() {
-    const selectedValues = [
-        speechRecognitionLanguageOptions.value,
-        targetLanguageOptions.value,
-        voiceOutputInput.checked,
-        conversationModeInput.checked
-    ];
+function didSettingsChange() {
+    const selectedValues = getSelectedSettingsValues();
     
-    let shouldShow = false;
+    let didChange = false;
     for (i=0; i<selectedValues.length; i++) {
         if (selectedValues[i] !== savedSettingsValues[i]) {
-            shouldShow = true;
+            didChange = true;
             break;
         }
     }
 
-    showSettingsSaveButton(shouldShow); 
+    return didChange;
 }
 
-// restarts continuous translation with updated settings
-function showSettingsSaveButton(shouldShow) {
-    if (shouldShow) {
-        settingsSaveButton.classList.remove('disabled');
-    } else {
-        settingsSaveButton.classList.add('disabled'); 
+function showSettings() {
+    document.getElementById("settingsModal").style.display = 'flex';
+    updateSavedSettingsValues();
+}
+
+function closeSettings() {
+    document.getElementById("settingsModal").style.display = 'none';
+    if (didSettingsChange()) {
+        restartContinuousTranslation();
     }
-}
-
-function onSettingsSaveButtonClick() {
-    updatedSavedSettingsValues();
-    checkShouldshowSettingsSaveButton();
-    restartContinuousTranslation();
+    updateSavedSettingsValues();
 }
 
 async function populateLanguageOptions() {
@@ -99,17 +85,7 @@ document.addEventListener("DOMContentLoaded", function () {
     voiceOutputInput = document.getElementById("voiceOutputInput");
     conversationModeInput = document.getElementById("conversationModeInput");
 
-    settingsList = [speechRecognitionLanguageOptions, targetLanguageOptions, voiceOutputInput, conversationModeInput];
-    settingsList.forEach(setting => {
-        setting.addEventListener("change", (event) =>  {
-            checkShouldshowSettingsSaveButton();
-        });
-    })
-
     populateLanguageOptions();
-    
-    settingsSaveButton = document.getElementById("settingsSaveButton");
-    settingsSaveButton.addEventListener("click", onSettingsSaveButtonClick);
 
     const settingsCloseButton = document.getElementById("settingsCloseButton");
     settingsCloseButton.addEventListener("click", closeSettings);
