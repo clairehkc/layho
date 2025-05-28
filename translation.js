@@ -108,13 +108,14 @@ function getSpeechConfig(sdkConfigType, detectedLanguage = undefined, newTargetL
     if (sdkConfigType == SpeechSDK.SpeechTranslationConfig) {
         const selectedTargetLanguage = targetLanguageOptions.value;
         targetLanguage = newTargetLanguage || selectedTargetLanguage;
+        console.log("target language:", targetLanguage);
 
         // only specify the language code that precedes the locale dash (-) separator
         const targetLanguageCode = targetLanguage.match(/.*(?=-)/)[0];
 
-        targetLanguageDisplay.textContent = targetLanguageCode;
+        targetLanguageDisplay.textContent = targetLanguage;
         speechConfig.addTargetLanguage(targetLanguageCode);
-        console.log("target language:", targetLanguageCode);
+        console.log("target language code:", targetLanguageCode);
         
 
         // If voice output is requested, set the target voice.
@@ -168,7 +169,7 @@ function onRecognizedResult(result) {
                 const resultJson = JSON.parse(result.json);
                 resultJson['Translation']['Translations'].forEach(
                     function (translation) {
-                    translated.textContent = `${translation.Text}\r\n`;
+                    translated.textContent = `${translation.DisplayText}\r\n`;
                 });
             }
             break;
@@ -350,6 +351,7 @@ function switchActiveLanguages() {
 }
 
 function onStartKeyPress() {
+    // should only work on translate view
     startContinuousTranslation();
 }
 

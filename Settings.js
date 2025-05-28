@@ -54,17 +54,19 @@ async function populateLanguageOptions() {
     for (const key of keys) {
         const recognitionOption = document.createElement('option');
         recognitionOption.value = key;
+        recognitionOption.dataset.voiceName = options[key].voiceName;
         recognitionOption.innerHTML = options[key].displayName;
         speechRecognitionLanguageOptions.appendChild(recognitionOption);
 
         const targetOption = document.createElement('option');
-        targetOption.value = options[key].voiceName;
+        targetOption.value = key;
+        targetOption.dataset.voiceName = options[key].voiceName;
         targetOption.innerHTML = options[key].displayName;
         targetLanguageOptions.appendChild(targetOption);
     }
 
     speechRecognitionLanguageOptions.value = "zh-HK";
-    targetLanguageOptions.value = "en-US-AvaMultilingualNeural";
+    targetLanguageOptions.value = "en-US";
 
     speechRecognitionLanguageOptions.addEventListener("change", (event) =>  {
         speechRecognitionLanguageDisplay.textContent = speechRecognitionLanguageOptions.selectedOptions[0].textContent;
