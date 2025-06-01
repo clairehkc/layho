@@ -94,7 +94,7 @@ function getAudioConfig() {
     return SpeechSDK.AudioConfig.fromDefaultMicrophoneInput();
 }
 
-function getSpeechConfig(sdkConfigType, detectedLanguage = undefined, newTargetLanguage = undefined, newTranslationVoice = undefined) {
+function getSpeechConfig(sdkConfigType, newSpeechRecognitionLanguage = undefined, newTargetLanguage = undefined) {
     let speechConfig;
     if (!apiKey) {
         console.error('no apiKey');
@@ -117,16 +117,17 @@ function getSpeechConfig(sdkConfigType, detectedLanguage = undefined, newTargetL
         speechConfig.addTargetLanguage(targetLanguageCode);
         console.log("target language code:", targetLanguageCode);
         
-
         // If voice output is requested, set the target voice.
         // If multiple text translations were requested, only the first one added will have audio synthesised for it.
         if (voiceOutputInput.checked) {
-            const translationVoice = newTranslationVoice || selectedTargetLanguage;
+            const translationVoice = targetLanguageOptions.selectedOptions[0].dataset.voiceName;
+            console.log("translationVoice", translationVoice);
             speechConfig.setProperty(SpeechSDK.PropertyId.SpeechServiceConnection_TranslationVoice, translationVoice);
         }
     }
 
-    speechConfig.speechRecognitionLanguage = detectedLanguage || speechRecognitionLanguageOptions.value;
+    const selectedSpeechRecognitionLanguage = speechRecognitionLanguageOptions.value;
+    speechConfig.speechRecognitionLanguage = newSpeechRecognitionLanguage || selectedSpeechRecognitionLanguage;
     speechRecognitionLanguage = speechConfig.speechRecognitionLanguage;
     speechRecognitionLanguageDisplay.textContent = speechRecognitionLanguage;
     console.log("recognition language:", speechRecognitionLanguage);
@@ -229,8 +230,8 @@ function applyCommonConfigurationTo(recognizer) {
     recognizer.sessionStopped = onSessionStopped;
 }
 
-function doContinuousTranslation(detectedLanguage = undefined, newTargetLanguage = undefined, newTranslationVoice = undefined) {
-    console.log("doContinuousTranslation", detectedLanguage, newTargetLanguage);
+function doContinuousTranslation(newSpeechRecognitionLanguage = undefined, newTargetLanguage = undefined) {
+    console.log("doContinuousTranslation", newSpeechRecognitionLanguage, newTargetLanguage);
     if (!apiKey) {
         console.error('no apiKey');
         return undefined;
@@ -240,12 +241,13 @@ function doContinuousTranslation(detectedLanguage = undefined, newTargetLanguage
     resetUiForScenarioStart();
 
     const audioConfig = getAudioConfig();
-    const speechConfig = getSpeechConfig(SpeechSDK.SpeechTranslationConfig, detectedLanguage, newTargetLanguage, newTranslationVoice);
+    const speechConfig = getSpeechConfig(SpeechSDK.SpeechTranslationConfig, newSpeechRecognitionLanguage, newTargetLanguage);
     if (!audioConfig || !speechConfig) return;
 
     // Create the TranslationRecognizer and set up common event handlers and PhraseListGrammar data.
-    activeTranslationRecognizer = new SpeechSDK.TranslationRecognizer(speechConfig, audioConfig);
-    applyCommonConfigurationTo(activeTranslationRecognizer);
+    const newTranslationRecognizer = new SpeechSDK.TranslationRecognizer(speechConfig, audioConfig);
+    applyCommonConfigurationTo(newTranslationRecognizer);
+    activeTranslationRecognizer = newTranslationRecognizer;
     console.log("speechConfig", speechConfig);
 
     // Additive in TranslationRecognizer, the 'synthesizing' event signals that a payload chunk of synthesized
@@ -253,7 +255,7 @@ function doContinuousTranslation(detectedLanguage = undefined, newTargetLanguage
     // If the event result contains valid audio, it's reason will be ResultReason.SynthesizingAudio
     // Once a complete phrase has been synthesized, the event will be called with
     // ResultReason.SynthesizingAudioComplete and a 0-byte audio payload.
-    activeTranslationRecognizer.synthesizing = function (s, e) {
+    newTranslationRecognizer.synthesizing = function (s, e) {
         const audioSize = e.result.audio === undefined ? 0 : e.result.audio.byteLength;
 
         if (e.result.audio && soundContext) {
@@ -267,7 +269,7 @@ function doContinuousTranslation(detectedLanguage = undefined, newTargetLanguage
     };
 
     // Start the continuous recognition/translation operation.
-    activeTranslationRecognizer.startContinuousRecognitionAsync();
+    newTranslationRecognizer.startContinuousRecognitionAsync();
 
     if (conversationModeInput.checked) {
         // continuous language recognition and automatic switching
@@ -304,26 +306,33 @@ function doContinuousTranslation(detectedLanguage = undefined, newTargetLanguage
             }
         }
     }
-    return activeTranslationRecognizer;
+    return newTranslationRecognizer;
 }
 
-function startContinuousTranslation(speechRecognitionLanguage, newTargetLanguage) {
-    translationRecognizer1 = doContinuousTranslation(speechRecognitionLanguage, newTargetLanguage);
+function startContinuousTranslation(newSpeechRecognitionLanguage, newTargetLanguage) {
+    translationRecognizer1 = doContinuousTranslation(newSpeechRecognitionLanguage, newTargetLanguage);
     if (conversationModeInput.checked) {
-        translationRecognizer2 = doContinuousTranslation("en-US", "yue", "zh-HK-HiuMaanNeural");
-        speechRecognitionLanguage = "zh-HK";
-        activeTranslationRecognizer = translationRecognizer1;
+        translationRecognizer2 = doContinuousTranslation(newTargetLanguage, newSpeechRecognitionLanguage);
     }
 }
 
-function stopContinuousTranslation() {
+function stopContinuousTranslation(isRestarting = false, isSwitchingActiveLanguages = false) {
     console.log("stopContinuousTranslation");
     if (!activeTranslationRecognizer) return;
+
+    const newSpeechRecognitionLanguage = isSwitchingActiveLanguages? targetLanguage : speechRecognitionLanguage;
+    const newTargetLanguage = isSwitchingActiveLanguages ? speechRecognitionLanguage : targetLanguage;
+    if (isSwitchingActiveLanguages) {
+        speechRecognitionLanguageOptions.value = newSpeechRecognitionLanguage;
+        targetLanguageOptions.value = newTargetLanguage;
+    }
+
     translationRecognizer1.stopContinuousRecognitionAsync(
         function () {
             translationRecognizer1.close();
-            activeTranslationRecognizer = undefined;
             translationRecognizer1 = undefined;
+            activeTranslationRecognizer = undefined;
+            if (isRestarting) startContinuousTranslation(newSpeechRecognitionLanguage, newTargetLanguage);
         }
     );
 
@@ -332,22 +341,16 @@ function stopContinuousTranslation() {
             function () {
                 translationRecognizer2.close();
                 translationRecognizer2 = undefined;
+                if (isRestarting) startContinuousTranslation(newTargetLanguage, newSpeechRecognitionLanguage);
             }
         );
     }
+
     isListening = false;
 }
 
 function switchActiveLanguages() {
-    translationRecognizer1.stopContinuousRecognitionAsync(
-        function () {
-            translationRecognizer1.close();
-            activeTranslationRecognizer = undefined;
-            translationRecognizer1 = undefined;
-            // TODO: fix language code formatting here
-            startContinuousTranslation(targetLanguage, speechRecognitionLanguage);
-        }
-    );
+    stopContinuousTranslation(true, true);
 }
 
 function onStartKeyPress() {
@@ -361,10 +364,5 @@ function onStopKeyPress() {
 
 function restartContinuousTranslation() {
     if (!isListening) return;
-    translationRecognizer1.stopContinuousRecognitionAsync(
-        function () {
-            translationRecognizer1.close();
-            startContinuousTranslation();
-        }
-    );
+    stopContinuousTranslation(true);
 }
