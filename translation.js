@@ -316,6 +316,9 @@ function startContinuousTranslation(newSpeechRecognitionLanguage, newTargetLangu
     activeTranslationRecognizer = translationRecognizer1;
     if (conversationModeInput.checked) {
         translationRecognizer2 = doContinuousTranslation(newTargetLanguage, newSpeechRecognitionLanguage);
+    } else {
+        // only show switch language button when not in conversation mode
+        switchLanguageButton.style.display = 'flex'
     }
 
     if (conversationModeInput.checked) {
@@ -326,6 +329,7 @@ function startContinuousTranslation(newSpeechRecognitionLanguage, newTargetLangu
 function stopContinuousTranslation(isRestarting = false, isSwitchingActiveLanguages = false) {
     console.log("stopContinuousTranslation");
     if (!activeTranslationRecognizer) return;
+    switchLanguageButton.style.display = 'none'
 
     const newSpeechRecognitionLanguage = isSwitchingActiveLanguages? targetLanguage : speechRecognitionLanguage;
     const newTargetLanguage = isSwitchingActiveLanguages ? speechRecognitionLanguage : targetLanguage;
