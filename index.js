@@ -1,4 +1,31 @@
 const signInCookieName = "layho_jwt";
+const googleClientId = "699001412765-r6d8ck46h18u9uk7b4dlddncospqcci1.apps.googleusercontent.com";
+
+function getCookieAttributes() {
+    if (window.isSecureContext) {
+        return "Path=/; SameSite=None; Secure";
+    }
+    return "Path=/; SameSite=Lax";
+}
+
+function setSignInCookie(token) {
+    document.cookie = `${signInCookieName}=${encodeURIComponent(token)}; ${getCookieAttributes()}; Max-Age=604800`;
+}
+
+function clearSignInCookie() {
+    document.cookie = `${signInCookieName}=; ${getCookieAttributes()}; Max-Age=0`;
+}
+
+function getSignInCookie() {
+    const value = document.cookie
+        .split("; ")
+        .find((row) => row.startsWith(`${signInCookieName}=`))
+        ?.split("=")
+        .slice(1)
+        .join("=");
+
+    return value ? decodeURIComponent(value) : undefined;
+}
 
 async function fetchApiKey(token) {
     const loginUrl = "https://7txxt2ts1e.execute-api.us-west-1.amazonaws.com/stage/loginLayho";
@@ -29,23 +56,20 @@ async function fetchApiKey(token) {
 }
 
 function handleCredentialResponse(response) {
-    document.cookie = `${signInCookieName}=${response.credential}; SameSite=None; Secure`;
+    setSignInCookie(response.credential);
     fetchApiKey(response.credential);
     document.getElementById("signInButton").style.display = 'none';
     document.getElementById("signOutButton").style.display = 'flex';
 }
 
 function checkSignedIn() {
-    const savedToken = document.cookie
-        .split("; ")
-        .find((row) => row.startsWith(`${signInCookieName}=`))
-        ?.split("=")[1];
+    const savedToken = getSignInCookie();
 
     if (savedToken) {
         fetchApiKey(savedToken);
     } else {
         document.getElementById("signInButton").style.display = 'flex';
-    }    
+    }
 }
 
 function onSignIn(name) {
@@ -55,7 +79,10 @@ function onSignIn(name) {
 }
 
 function onSignOut() {
-    document.cookie = `${signInCookieName}=; SameSite=None; Secure`;
+    clearSignInCookie();
+    if (window.google?.accounts?.id) {
+        google.accounts.id.disableAutoSelect();
+    }
     apiKey = undefined;
     document.getElementById("signOutButton").style.display = 'none';
     document.getElementById("signInButton").style.display = 'flex';
@@ -63,16 +90,27 @@ function onSignOut() {
     document.getElementById("settingsStartButtonContainer").style.visibility = 'hidden';
 }
 
-window.onload = function () {
-    const client_id = "699001412765-r6d8ck46h18u9uk7b4dlddncospqcci1.apps.googleusercontent.com";
+function initGoogleSignIn() {
+    if (window.location.protocol === "file:") {
+        console.error(
+            "Google Sign-In requires http://localhost — open the page with a local server, not as a file."
+        );
+        return;
+    }
+
+    if (!window.google?.accounts?.id) {
+        console.error("Google Identity Services failed to load.");
+        return;
+    }
 
     google.accounts.id.initialize({
-        client_id,
-        callback: handleCredentialResponse
+        client_id: googleClientId,
+        callback: handleCredentialResponse,
+        use_fedcm_for_button: false,
     });
     google.accounts.id.renderButton(
         document.getElementById("signInButton"),
-        { theme: "outline", size: "large" }  // customization attributes
+        { theme: "outline", size: "large", type: "standard", text: "signin_with" }
     );
 }
 
