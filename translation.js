@@ -68,13 +68,27 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const homeButton = document.getElementById("homeButton");
     homeButton.addEventListener("click", function () {
+        closeSettings(false);
         document.getElementById("translationContainer").style.display = 'none';
         document.getElementById("introContainer").style.display = 'flex';
-        closeSettings();
+        document.getElementById("startAppButton").focus();
+        document.getElementById("speechStatus").textContent = "Home view.";
     });
 
     document.addEventListener("keydown", (event) => {
-        if (event.key === "s") {
+        const isEditableTarget = event.target.closest("input, select, textarea, [contenteditable='true']");
+        const isTranslationViewOpen = document.getElementById("translationContainer").style.display === "block";
+        const isSettingsOpen = document.getElementById("settingsModal").style.display === "flex";
+        if (
+            event.key.toLowerCase() === "s"
+            && !event.ctrlKey
+            && !event.metaKey
+            && !event.altKey
+            && !isEditableTarget
+            && isTranslationViewOpen
+            && !isSettingsOpen
+        ) {
+            event.preventDefault();
             if (!isListening) {
                 onStartKeyPress();
             } else {
@@ -178,11 +192,13 @@ function onRecognizedResult(result) {
 function onSessionStarted(sender, sessionEventArgs) {
     startButton.disabled = true;
     stopButton.disabled = false;
+    document.getElementById("speechStatus").textContent = "Listening for speech.";
 }
 
 function onSessionStopped(sender, sessionEventArgs) {
     startButton.disabled = false;
     stopButton.disabled = true;
+    document.getElementById("speechStatus").textContent = "Speech recognition stopped.";
 }
 
 function onCanceled (sender, cancellationEventArgs) {
@@ -190,6 +206,7 @@ function onCanceled (sender, cancellationEventArgs) {
 
     if (cancellationEventArgs.reason === SpeechSDK.CancellationReason.Error) {
         console.error("cancel due to error", cancellationEventArgs.errorDetails);
+        document.getElementById("speechStatus").textContent = `Speech recognition error: ${cancellationEventArgs.errorDetails}`;
     }
 }
 

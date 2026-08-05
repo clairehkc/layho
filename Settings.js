@@ -5,6 +5,17 @@ let conversationModeInput;
 
 let settingsList;
 let savedSettingsValues;
+let settingsTrigger;
+
+function getSettingsModal() {
+    return document.getElementById("settingsModal");
+}
+
+function getSettingsFocusableElements() {
+    return Array.from(getSettingsModal().querySelectorAll(
+        "button:not([disabled]), select:not([disabled]), input:not([disabled])"
+    ));
+}
 
 function getSelectedSettingsValues() {
     return [
@@ -33,17 +44,33 @@ function didSettingsChange() {
     return didChange;
 }
 
-function showSettings() {
-    document.getElementById("settingsModal").style.display = 'flex';
+function showSettings(trigger = document.activeElement) {
+    const settingsModal = getSettingsModal();
+    settingsTrigger = trigger;
+    document.getElementById("introContainer").inert = true;
+    document.getElementById("translationContainer").inert = true;
+    settingsModal.style.display = 'flex';
+    settingsModal.setAttribute("aria-hidden", "false");
     updateSavedSettingsValues();
+    getSettingsFocusableElements()[0].focus();
 }
 
-function closeSettings() {
-    document.getElementById("settingsModal").style.display = 'none';
-    if (didSettingsChange()) {
+function closeSettings(shouldRestoreFocus = true) {
+    const settingsModal = getSettingsModal();
+    const wasOpen = settingsModal.style.display === 'flex';
+    settingsModal.style.display = 'none';
+    settingsModal.setAttribute("aria-hidden", "true");
+    document.getElementById("introContainer").inert = false;
+    document.getElementById("translationContainer").inert = false;
+    if (wasOpen && didSettingsChange()) {
         restartContinuousTranslation();
+        document.getElementById("speechStatus").textContent = "Settings applied.";
     }
     updateSavedSettingsValues();
+
+    if (wasOpen && shouldRestoreFocus && settingsTrigger?.isConnected && !settingsTrigger.hidden) {
+        settingsTrigger.focus();
+    }
 }
 
 function createNewLanguageOption(options, key) {
@@ -104,6 +131,61 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
+    [speechRecognitionLanguageOptions, targetLanguageOptions].forEach((select) => {
+        select.addEventListener("keydown", (event) => {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                if (typeof select.showPicker === "function") {
+                    try {
+                        select.showPicker();
+                        return;
+                    } catch (error) {
+                        console.warn("Unable to open language picker.", error);
+                    }
+                }
+
+                select.selectedIndex = (select.selectedIndex + 1) % select.options.length;
+                select.dispatchEvent(new Event("change", { bubbles: true }));
+            }
+        });
+    });
+
+    [voiceOutputInput, conversationModeInput].forEach((input) => {
+        input.addEventListener("keydown", (event) => {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                input.click();
+            }
+        });
+    });
+
     const settingsCloseButton = document.getElementById("settingsCloseButton");
     settingsCloseButton.addEventListener("click", closeSettings);
+
+    document.addEventListener("keydown", (event) => {
+        const settingsModal = getSettingsModal();
+        if (settingsModal.style.display !== "flex") {
+            return;
+        }
+
+        if (event.key === "Escape") {
+            event.preventDefault();
+            closeSettings();
+            return;
+        }
+
+        if (event.key === "Tab") {
+            const focusableElements = getSettingsFocusableElements();
+            const firstElement = focusableElements[0];
+            const lastElement = focusableElements[focusableElements.length - 1];
+
+            if (event.shiftKey && document.activeElement === firstElement) {
+                event.preventDefault();
+                lastElement.focus();
+            } else if (!event.shiftKey && document.activeElement === lastElement) {
+                event.preventDefault();
+                firstElement.focus();
+            }
+        }
+    });
 });

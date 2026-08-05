@@ -74,7 +74,7 @@ function checkSignedIn() {
 
 function onSignIn(name) {
     document.getElementById("nameText").textContent = name;
-    document.getElementById("settingsStartButtonContainer").style.visibility = 'visible';
+    document.getElementById("settingsStartButtonContainer").hidden = false;
     document.getElementById("signOutButton").style.display = 'flex';
 }
 
@@ -87,7 +87,7 @@ function onSignOut() {
     document.getElementById("signOutButton").style.display = 'none';
     document.getElementById("signInButton").style.display = 'flex';
     document.getElementById("nameText").textContent = "";
-    document.getElementById("settingsStartButtonContainer").style.visibility = 'hidden';
+    document.getElementById("settingsStartButtonContainer").hidden = true;
 }
 
 function initGoogleSignIn() {
@@ -129,6 +129,8 @@ document.addEventListener("DOMContentLoaded", function () {
     startAppButton.addEventListener("click", function () {
         document.getElementById("introContainer").style.display = 'none';
         document.getElementById("translationContainer").style.display = 'block';
+        document.getElementById("startButton").focus();
+        document.getElementById("speechStatus").textContent = "Translation view.";
     });
 
     checkSignedIn();

@@ -85,14 +85,19 @@ button {
 	cursor: pointer;
 	border: none;
     background-color: transparent;
-	outline-style: solid;
-	outline-width: 2px;
+	outline: 2px solid var(--primary-link-color);
+	outline-offset: 2px;
 	padding: 6px 8px 6px 8px;
 	border-radius: 10px;
 }
 
-button:focus {
-    border: none;
+button:focus-visible {
+	outline-color: var(--secondary-link-color);
+}
+
+select:focus-visible {
+	outline: 3px solid var(--secondary-link-color);
+	outline-offset: 3px;
 }
 
 button:hover {
@@ -126,9 +131,10 @@ button:hover {
 }
 
 #settingsModal {
-	position: absolute;
+	position: fixed;
+	inset: 0;
 	width: 100%;
-	height: 80vh;
+	height: 100vh;
 	z-index: 1;
 	background-color: var(--primary-fg-color);
 	color: var(--primary-bg-color);
@@ -136,7 +142,7 @@ button:hover {
 
 #settingsContainer {
 	width: 100%;
-	height: 80vh;
+	height: 100vh;
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -151,6 +157,7 @@ button:hover {
 
 #settingsHeader {
 	font-size: 3.2em;
+	margin: 0;
 }
 
 #settingsFooter {
@@ -185,6 +192,7 @@ button:hover {
 	width: 100%;
 	font-size: 1.6em;
 	padding: 1vh 0 1vh 0;
+	margin: 0;
 }
 
 .settingOption {
@@ -280,12 +288,25 @@ input:checked + .slider {
 	background-color: var(--secondary-link-color);;
 }
 
-input:focus + .slider {
-	box-shadow: 0 0 1px var(--secondary-link-color);;;
+input:focus-visible + .slider {
+	outline: 3px solid var(--secondary-link-color);
+	outline-offset: 3px;
 }
 
 input:checked + .slider:before {
 	-webkit-transform: translateX(26px);
 	-ms-transform: translateX(26px);
 	transform: translateX(26px);
+}
+
+.visuallyHidden {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	white-space: nowrap;
+	border: 0;
 }
