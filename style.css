@@ -74,7 +74,7 @@ body {
 	align-items: center;
 	justify-content: center;
 	flex-wrap: wrap;
-	width: 328px;
+	width: 368px;
 	color: var(--primary-fg-color);
 }
 
@@ -167,7 +167,17 @@ button:disabled {
 	padding-top: 6vh;
 	font-size: 2em;
 	flex-direction: row;
-	justify-content: space-evenly;
+	justify-content: center;
+	gap: 1.25em;
+	--control-button-width: 7em;
+}
+
+#settingsStartButtonContainer > button {
+	width: var(--control-button-width);
+	box-sizing: border-box;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
 }
 
 #settingsModal {
@@ -259,19 +269,27 @@ select {
 	flex-direction: column;
 	width: 100%;
 	height: 100vh;
+	--control-button-width: 7em;
 }
 
 #controlsContainer {
 	color: #FFF;
 	display: flex;
+	justify-content: center;
 	gap: 16px;
 	flex-shrink: 0;
 	padding: 8px 16px;
 }
 
+#controlsContainer > button,
+#startStopButtonContainer,
+#switchLanguageButton {
+	width: var(--control-button-width);
+	box-sizing: border-box;
+}
+
 #startStopButtonContainer {
 	display: grid;
-	min-width: 4.5em;
 }
 
 #startStopButtonContainer > button {
