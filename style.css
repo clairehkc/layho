@@ -93,7 +93,23 @@ body {
 
 #nameText {
 	height: 6vh;
+	min-height: 1.2em;
 	font-size: 3em;
+	line-height: 1.2;
+}
+
+#signInOutContainer {
+	height: 40px;
+	min-height: 40px;
+	min-width: 0;
+	overflow: hidden;
+}
+
+#signInButton {
+	width: 240px;
+	height: 40px;
+	overflow: hidden;
+	line-height: 0;
 }
 
 button {

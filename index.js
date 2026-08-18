@@ -74,7 +74,7 @@ function checkSignedIn() {
 
 function onSignIn(name) {
     document.getElementById("nameText").textContent = name;
-    document.getElementById("settingsStartButtonContainer").hidden = false;
+    document.getElementById("startAppButton").disabled = false;
     document.getElementById("signOutButton").style.display = 'flex';
 }
 
@@ -87,7 +87,7 @@ function onSignOut() {
     document.getElementById("signOutButton").style.display = 'none';
     document.getElementById("signInButton").style.display = 'flex';
     document.getElementById("nameText").textContent = "";
-    document.getElementById("settingsStartButtonContainer").hidden = true;
+    document.getElementById("startAppButton").disabled = true;
 }
 
 function initGoogleSignIn() {
@@ -110,7 +110,7 @@ function initGoogleSignIn() {
     });
     google.accounts.id.renderButton(
         document.getElementById("signInButton"),
-        { theme: "outline", size: "large", type: "standard", text: "signin_with" }
+        { theme: "outline", size: "large", type: "standard", text: "signin_with", width: 240 }
     );
 }
 
@@ -127,6 +127,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const startAppButton = document.getElementById("startAppButton");
     startAppButton.addEventListener("click", function () {
+        if (startAppButton.disabled) return;
         document.getElementById("introContainer").style.display = 'none';
         document.getElementById("translationContainer").style.display = 'flex';
         document.getElementById("startButton").focus();
