@@ -77,7 +77,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     document.addEventListener("keydown", (event) => {
         const isEditableTarget = event.target.closest("input, select, textarea, [contenteditable='true']");
-        const isTranslationViewOpen = document.getElementById("translationContainer").style.display === "block";
+        const isTranslationViewOpen = document.getElementById("translationContainer").style.display === "flex";
         const isSettingsOpen = document.getElementById("settingsModal").style.display === "flex";
         if (
             event.key.toLowerCase() === "s"
@@ -189,15 +189,22 @@ function onRecognizedResult(result) {
     }
 }
 
+function setStartStopButtonsListening(listening) {
+    startButton.hidden = listening;
+    stopButton.hidden = !listening;
+    const nextButton = listening ? stopButton : startButton;
+    if (document.activeElement === startButton || document.activeElement === stopButton) {
+        nextButton.focus();
+    }
+}
+
 function onSessionStarted(sender, sessionEventArgs) {
-    startButton.disabled = true;
-    stopButton.disabled = false;
+    setStartStopButtonsListening(true);
     document.getElementById("speechStatus").textContent = "Listening for speech.";
 }
 
 function onSessionStopped(sender, sessionEventArgs) {
-    startButton.disabled = false;
-    stopButton.disabled = true;
+    setStartStopButtonsListening(false);
     document.getElementById("speechStatus").textContent = "Speech recognition stopped.";
 }
 
@@ -333,10 +340,9 @@ function startContinuousTranslation(newSpeechRecognitionLanguage, newTargetLangu
     activeTranslationRecognizer = translationRecognizer1;
     if (conversationModeInput.checked) {
         translationRecognizer2 = doContinuousTranslation(newTargetLanguage, newSpeechRecognitionLanguage);
-    } else {
-        // only show switch language button when not in conversation mode
-        switchLanguageButton.style.display = 'flex'
     }
+
+    switchLanguageButton.disabled = conversationModeInput.checked;
 
     if (conversationModeInput.checked) {
         startConversationMode();
@@ -346,7 +352,7 @@ function startContinuousTranslation(newSpeechRecognitionLanguage, newTargetLangu
 function stopContinuousTranslation(isRestarting = false, isSwitchingActiveLanguages = false) {
     console.log("stopContinuousTranslation");
     if (!activeTranslationRecognizer) return;
-    switchLanguageButton.style.display = 'none'
+    switchLanguageButton.disabled = true;
 
     const newSpeechRecognitionLanguage = isSwitchingActiveLanguages? targetLanguage : speechRecognitionLanguage;
     const newTargetLanguage = isSwitchingActiveLanguages ? speechRecognitionLanguage : targetLanguage;

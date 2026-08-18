@@ -128,7 +128,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const startAppButton = document.getElementById("startAppButton");
     startAppButton.addEventListener("click", function () {
         document.getElementById("introContainer").style.display = 'none';
-        document.getElementById("translationContainer").style.display = 'block';
+        document.getElementById("translationContainer").style.display = 'flex';
         document.getElementById("startButton").focus();
         document.getElementById("speechStatus").textContent = "Translation view.";
     });

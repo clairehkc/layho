@@ -66,14 +66,16 @@
 		</div>
 		<div id="translationContainer" style="display: none">
 			<div id="controlsContainer">
-				<button id="startButton" aria-keyshortcuts="s">Start</button>
-				<button id="stopButton" disabled="disabled">Stop</button>
+				<div id="startStopButtonContainer">
+					<button id="startButton" aria-keyshortcuts="s">Start</button>
+					<button id="stopButton" hidden aria-keyshortcuts="s">Stop</button>
+				</div>
 				<button id="translateViewSettingsButton">Settings</button>
 				<button id="homeButton">Home</button>
 			</div>
 			<div id="languageSelectionDisplay">
 				<div id="speechRecognitionLanguageDisplay"></div>
-				<button id="switchLanguageButton" style="display: none">SWITCH</button>
+				<button id="switchLanguageButton" disabled>SWITCH</button>
 				<div id="targetLanguageDisplay"></div>
 			</div>
 			<div id="translationDisplayContainer">
