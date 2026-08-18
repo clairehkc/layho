@@ -349,6 +349,11 @@ function startContinuousTranslation(newSpeechRecognitionLanguage, newTargetLangu
     }
 }
 
+/*
+ * Stops continuous recognition on the active translation recognizer(s) and closes them.
+ * isRestarting - when true, starts a new session after stop completes (used by restart and language switch)
+ * isSwitchingActiveLanguages - when true, swaps the speech recognition and target languages before restarting
+ */
 function stopContinuousTranslation(isRestarting = false, isSwitchingActiveLanguages = false) {
     console.log("stopContinuousTranslation");
     if (!activeTranslationRecognizer) return;
@@ -387,6 +392,7 @@ function stopContinuousTranslation(isRestarting = false, isSwitchingActiveLangua
 }
 
 function switchActiveLanguages() {
+    // stops continuous recognition, swaps the speech recognition and target languages, and restarts continuous recognition
     stopContinuousTranslation(true, true);
 }
 
