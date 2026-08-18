@@ -30,9 +30,59 @@ try {
     window.console.log("no sound context found, no audio output. " + e);
 }
 
+const MIN_TRANSLATION_FONT_SIZE_PX = 10;
+const TRANSLATION_TEXT_MARGIN_PX = 48;
+
 function resetUiForScenarioStart() {
     detected.textContent = "";
     translated.textContent = "";
+    fitTranslationText();
+}
+
+function translationTextOverflows(container, content) {
+    return content.scrollHeight > container.clientHeight - TRANSLATION_TEXT_MARGIN_PX
+        || content.scrollWidth > container.clientWidth - TRANSLATION_TEXT_MARGIN_PX;
+}
+
+function fitTranslationText() {
+    const container = document.getElementById("translationDisplayContainer");
+    const resultsContainer = document.getElementById("resultsContainer");
+    if (!container || !resultsContainer) return;
+
+    resultsContainer.style.removeProperty("--translation-text-size");
+
+    const textElement = document.querySelector(".translationTextContainer");
+    if (!textElement) return;
+
+    const availableHeight = container.clientHeight - TRANSLATION_TEXT_MARGIN_PX;
+    const availableWidth = container.clientWidth - TRANSLATION_TEXT_MARGIN_PX;
+    if (availableHeight <= 0 || availableWidth <= 0) return;
+
+    const cssDefaultSize = parseFloat(getComputedStyle(textElement).fontSize);
+    const maxFontSize = Math.max(cssDefaultSize, availableHeight, availableWidth);
+
+    let low = MIN_TRANSLATION_FONT_SIZE_PX;
+    let high = maxFontSize;
+    let bestFit = maxFontSize;
+
+    while (low <= high) {
+        const mid = Math.floor((low + high) / 2);
+        resultsContainer.style.setProperty("--translation-text-size", `${mid}px`);
+        if (translationTextOverflows(container, resultsContainer)) {
+            high = mid - 1;
+        } else {
+            bestFit = mid;
+            low = mid + 1;
+        }
+    }
+
+    resultsContainer.style.setProperty("--translation-text-size", `${bestFit}px`);
+}
+
+let fitTranslationTextFrame;
+function scheduleFitTranslationText() {
+    cancelAnimationFrame(fitTranslationTextFrame);
+    fitTranslationTextFrame = requestAnimationFrame(fitTranslationText);
 }
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -41,6 +91,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
     detected = document.getElementById("detected");
     translated = document.getElementById("translated");
+
+    const translationDisplayContainer = document.getElementById("translationDisplayContainer");
+    new ResizeObserver(scheduleFitTranslationText).observe(translationDisplayContainer);
+    window.addEventListener("resize", scheduleFitTranslationText);
 
     const speechRecognitionLanguageDisplay =  document.getElementById("speechRecognitionLanguageDisplay");
     const targetLanguageDisplay =  document.getElementById("targetLanguageDisplay");
@@ -155,8 +209,11 @@ function getSpeechConfig(sdkConfigType, newSpeechRecognitionLanguage = undefined
 function onRecognizing(sender, recognitionEventArgs) {
     if (sender.speechRecognitionLanguage !== speechRecognitionLanguage) return;
     const result = recognitionEventArgs.result;
-    if (result.text) detected.textContent = detected.textContent.replace(/(.*)(^|[\r\n]+).*\[\.\.\.\][\r\n]+/, '$1$2')
-        + `${result.text} [...]\r\n`;
+    if (result.text) {
+        detected.textContent = detected.textContent.replace(/(.*)(^|[\r\n]+).*\[\.\.\.\][\r\n]+/, '$1$2')
+            + `${result.text} [...]\r\n`;
+        scheduleFitTranslationText();
+    }
 }
 
 function onRecognized(sender, recognitionEventArgs) {
@@ -193,6 +250,8 @@ function onRecognizedResult(result) {
             }
             break;
     }
+
+    scheduleFitTranslationText();
 }
 
 function setStartStopButtonsListening(listening) {

@@ -441,16 +441,23 @@ select {
 	min-height: 0;
 	align-items: center;
 	justify-content: center;
+	overflow: hidden;
 }
 
 #resultsContainer {
-	margin: 12px;
+	--translation-text-size: calc(4vw + 4vh + 2vmin);
+	margin: 24px;
+	max-width: calc(100% - 48px);
+	max-height: calc(100% - 48px);
+	overflow: hidden;
 }
 
 .translationTextContainer {
 	color: var(--primary-fg-color);
-	font-size: calc(4vw + 4vh + 2vmin);
+	font-size: var(--translation-text-size);
 	text-align: center;
+	overflow-wrap: break-word;
+	word-wrap: break-word;
 }
 
 #separator {
