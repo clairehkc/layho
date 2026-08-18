@@ -12,12 +12,11 @@
 				<div class="introText" id="nameText"></div>
 				<div class="introText" id="signInOutContainer">
 					<div id="signInButton" style="display: none"></div>
-					<button id="signOutButton" style="display: none">Sign out</button>
-					<!-- <button class="iconButton" id="signOutButton" style="display: none"><span class="icon signOutIcon" title="Sign out"></span></button> -->
+					<button id="signOutButton" class="iconButton" style="display: none"><span class="icon signOutIcon" aria-hidden="true"></span><span class="buttonLabel">Sign out</span></button>
 				</div>
 				<div class="introText" id="settingsStartButtonContainer">	
-					<button id="settingsButton">Settings</button>
-					<button id="startAppButton" disabled>START</button>
+					<button id="settingsButton" class="iconButton"><span class="icon settingsIcon" aria-hidden="true"></span><span class="buttonLabel">Settings</span></button>
+					<button id="startAppButton" class="iconButton" disabled><span class="icon startIcon" aria-hidden="true"></span><span class="buttonLabel">START</span></button>
 				</div>
 			</div>
 		</div>
@@ -58,24 +57,22 @@
 							</div>
 						</div>
 					</div>
-					<div id="settingsFooter">
-						<button id="settingsCloseButton" class="settingsFooterButton">Close</button>
-					</div>
 				</div>
 			</div>
+			<button id="settingsCloseButton" class="settingsCloseButton iconButton iconOnlyButton" aria-label="Back"><span class="icon backIcon" aria-hidden="true"></span></button>
 		</div>
 		<div id="translationContainer" style="display: none">
 			<div id="controlsContainer">
-				<button id="homeButton">Home</button>
-				<button id="translateViewSettingsButton">Settings</button>
+				<button id="homeButton" class="iconButton"><span class="icon homeIcon" aria-hidden="true"></span><span class="buttonLabel">Home</span></button>
+				<button id="translateViewSettingsButton" class="iconButton"><span class="icon settingsIcon" aria-hidden="true"></span><span class="buttonLabel">Settings</span></button>
 				<div id="startStopButtonContainer">
-					<button id="startButton" aria-keyshortcuts="s">Start</button>
-					<button id="stopButton" hidden aria-keyshortcuts="s">Stop</button>
+					<button id="startButton" class="iconButton" aria-keyshortcuts="s"><span class="icon startIcon" aria-hidden="true"></span><span class="buttonLabel">START</span></button>
+					<button id="stopButton" class="iconButton" hidden aria-keyshortcuts="s"><span class="icon stopIcon" aria-hidden="true"></span><span class="buttonLabel">STOP</span></button>
 				</div>
 			</div>
 			<div id="languageSelectionDisplay">
 				<div id="speechRecognitionLanguageDisplay"></div>
-				<button id="switchLanguageButton">SWITCH</button>
+				<button id="switchLanguageButton" class="iconButton"><span class="icon switchIcon" aria-hidden="true"></span><span class="buttonLabel">SWITCH</span></button>
 				<div id="targetLanguageDisplay"></div>
 			</div>
 			<div id="translationDisplayContainer">

@@ -96,6 +96,7 @@ body {
 	min-height: 1.2em;
 	font-size: 3em;
 	line-height: 1.2;
+	padding-bottom: 0.5vh;
 }
 
 #signInOutContainer {
@@ -119,14 +120,18 @@ button {
 	cursor: pointer;
 	border: none;
     background-color: transparent;
-	outline: 2px solid var(--primary-link-color);
-	outline-offset: 2px;
+	outline: none;
 	padding: 6px 8px 6px 8px;
 	border-radius: 10px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.4em;
 }
 
 button:focus-visible {
-	outline-color: var(--secondary-link-color);
+	outline: 2px solid var(--secondary-link-color);
+	outline-offset: 2px;
 }
 
 select:focus-visible {
@@ -140,30 +145,90 @@ button:hover:not(:disabled) {
 
 button:disabled {
 	color: var(--disabled-color);
-	outline-color: var(--disabled-color);
 	cursor: default;
 }
 
-/* .iconButton {
-	width: 48px;
-	height: 48px;
-	display: flex;
+button[hidden] {
+	display: none !important;
+}
+
+.iconButton {
+	flex-direction: column;
 	align-items: center;
 	justify-content: center;
-    outline: none;
+	width: auto;
+	height: auto;
+	padding: 6px 8px;
+	gap: 0.15em;
+}
+
+.iconOnlyButton {
+	padding: 6px;
+}
+
+.iconButton .icon {
+	width: 28px;
+	height: 28px;
+}
+
+.buttonLabel {
+	font-size: 1rem;
+	line-height: 1.2;
+	text-align: center;
 }
 
 .icon {
-	width: 32px;
-	height: 32px;
+	display: block;
+	width: 1.1em;
+	height: 1.1em;
+	flex-shrink: 0;
+	background-color: currentColor;
+}
+
+.homeIcon {
+	mask: url(icons/home.svg) no-repeat center / contain;
+	-webkit-mask: url(icons/home.svg) no-repeat center / contain;
+	background-color: currentColor;
+}
+
+.startIcon {
+	mask: url(icons/start.svg) no-repeat center / contain;
+	-webkit-mask: url(icons/start.svg) no-repeat center / contain;
+	background-color: currentColor;
+}
+
+.stopIcon {
+	mask: url(icons/stop.svg) no-repeat center / contain;
+	-webkit-mask: url(icons/stop.svg) no-repeat center / contain;
+	background-color: currentColor;
+}
+
+.settingsIcon {
+	mask: url(icons/settings.svg) no-repeat center / contain;
+	-webkit-mask: url(icons/settings.svg) no-repeat center / contain;
+	background-color: currentColor;
 }
 
 .signOutIcon {
-	background: url(icons/sign-out.png) no-repeat;
-} */
+	mask: url(icons/sign-out.svg) no-repeat center / contain;
+	-webkit-mask: url(icons/sign-out.svg) no-repeat center / contain;
+	background-color: currentColor;
+}
+
+.switchIcon {
+	mask: url(icons/switch.svg) no-repeat center / contain;
+	-webkit-mask: url(icons/switch.svg) no-repeat center / contain;
+	background-color: currentColor;
+}
+
+.backIcon {
+	mask: url(icons/back.svg) no-repeat center / contain;
+	-webkit-mask: url(icons/back.svg) no-repeat center / contain;
+	background-color: currentColor;
+}
 
 #settingsStartButtonContainer {
-	height: 4vh;
+	min-height: 4vh;
 	padding-top: 6vh;
 	font-size: 2em;
 	flex-direction: row;
@@ -172,12 +237,13 @@ button:disabled {
 	--control-button-width: 7em;
 }
 
-#settingsStartButtonContainer > button {
+#settingsStartButtonContainer .iconButton {
 	width: var(--control-button-width);
-	box-sizing: border-box;
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
+}
+
+#settingsStartButtonContainer .iconButton .icon {
+	width: 32px;
+	height: 32px;
 }
 
 #settingsModal {
@@ -206,24 +272,19 @@ button:disabled {
 }
 
 #settingsHeader {
-	font-size: 3.2em;
+	font-size: 2.4em;
 	margin: 0;
 }
 
-#settingsFooter {
-	width: 100%;
-	display: flex;
-	justify-content: flex-end;
-	margin-top: 2vh;
-}
-
-.settingsFooterButton {
+.settingsCloseButton {
+	position: absolute;
+	top: 16px;
+	left: 16px;
 	color: var(--primary-bg-color);
-	outline-color: var(--primary-bg-color);
 	font-size: 1.2em;
 }
 
-button.settingsFooterButton:hover:not(:disabled) {
+button.settingsCloseButton:hover:not(:disabled) {
 	color: var(--settings-hover-color);
 }
 
@@ -281,7 +342,7 @@ select {
 	padding: 8px 16px;
 }
 
-#controlsContainer > button,
+#controlsContainer > .iconButton,
 #startStopButtonContainer,
 #switchLanguageButton {
 	width: var(--control-button-width);
