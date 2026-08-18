@@ -284,7 +284,7 @@ button[hidden] {
 	font-size: 2em;
 	flex-direction: row;
 	justify-content: center;
-	gap: 1.25em;
+	gap: 6em;
 }
 
 #settingsStartButtonContainer .iconButton .icon {
