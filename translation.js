@@ -55,6 +55,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
     switchLanguageButton.addEventListener("click", function() {
         switchActiveLanguages();
+        if (isListening) {
+            stopContinuousTranslation(true);
+        }
     });
 
     Initialize(async function (speechSdk) {
@@ -340,11 +343,6 @@ function startContinuousTranslation(newSpeechRecognitionLanguage, newTargetLangu
     activeTranslationRecognizer = translationRecognizer1;
     if (conversationModeInput.checked) {
         translationRecognizer2 = doContinuousTranslation(newTargetLanguage, newSpeechRecognitionLanguage);
-    }
-
-    switchLanguageButton.disabled = conversationModeInput.checked;
-
-    if (conversationModeInput.checked) {
         startConversationMode();
     }
 }
@@ -352,22 +350,13 @@ function startContinuousTranslation(newSpeechRecognitionLanguage, newTargetLangu
 /*
  * Stops continuous recognition on the active translation recognizer(s) and closes them.
  * isRestarting - when true, starts a new session after stop completes (used by restart and language switch)
- * isSwitchingActiveLanguages - when true, swaps the speech recognition and target languages before restarting
  */
-function stopContinuousTranslation(isRestarting = false, isSwitchingActiveLanguages = false) {
+function stopContinuousTranslation(isRestarting = false) {
     console.log("stopContinuousTranslation");
     if (!activeTranslationRecognizer) return;
-    switchLanguageButton.disabled = true;
 
-    const newSpeechRecognitionLanguage = isSwitchingActiveLanguages? targetLanguage : speechRecognitionLanguage;
-    const newTargetLanguage = isSwitchingActiveLanguages ? speechRecognitionLanguage : targetLanguage;
-    if (isSwitchingActiveLanguages) {
-        speechRecognitionLanguageOptions.value = newSpeechRecognitionLanguage;
-        targetLanguageOptions.value = newTargetLanguage;
-
-        speechRecognitionLanguageDisplay.textContent = speechRecognitionLanguageOptions.selectedOptions[0].dataset.displayName;
-        targetLanguageDisplay.textContent = targetLanguageOptions.selectedOptions[0].dataset.displayName;
-    }
+    const newSpeechRecognitionLanguage = speechRecognitionLanguageOptions.value;
+    const newTargetLanguage = targetLanguageOptions.value;
 
     translationRecognizer1.stopContinuousRecognitionAsync(
         function () {
@@ -392,8 +381,14 @@ function stopContinuousTranslation(isRestarting = false, isSwitchingActiveLangua
 }
 
 function switchActiveLanguages() {
-    // stops continuous recognition, swaps the speech recognition and target languages, and restarts continuous recognition
-    stopContinuousTranslation(true, true);
+    const newSpeechRecognitionLanguage = targetLanguageOptions.value;
+    const newTargetLanguage = speechRecognitionLanguageOptions.value;
+
+    speechRecognitionLanguageOptions.value = newSpeechRecognitionLanguage;
+    targetLanguageOptions.value = newTargetLanguage;
+
+    speechRecognitionLanguageDisplay.textContent = speechRecognitionLanguageOptions.selectedOptions[0].dataset.displayName;
+    targetLanguageDisplay.textContent = targetLanguageOptions.selectedOptions[0].dataset.displayName;
 }
 
 function onStartKeyPress() {
