@@ -72,6 +72,9 @@ document.addEventListener("DOMContentLoaded", function () {
     const homeButton = document.getElementById("homeButton");
     homeButton.addEventListener("click", function () {
         closeSettings(false);
+        if (isListening) {
+            stopContinuousTranslation();
+        }
         document.getElementById("translationContainer").style.display = 'none';
         document.getElementById("introContainer").style.display = 'flex';
         document.getElementById("startAppButton").focus();
