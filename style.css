@@ -37,7 +37,7 @@
 @property --disabled-color {
 	syntax: "<color>";
 	inherits: false;
-	initial-value: #ccc;
+	initial-value: #4a4a4a;
 }
 
 @property --toggle-off-color {
@@ -92,7 +92,7 @@ button:hover:not(:disabled) {
 
 button:disabled {
 	color: var(--disabled-color);
-	cursor: default;
+	cursor: not-allowed;
 }
 
 button[hidden] {
@@ -129,7 +129,7 @@ button[hidden] {
 	border: 0;
 }
 
-.iconButton:hover:not(:disabled) .buttonLabel,
+.iconButton:hover .buttonLabel,
 .iconButton:focus-visible .buttonLabel {
 	position: absolute;
 	bottom: calc(100% + 6px);
@@ -151,6 +151,12 @@ button[hidden] {
 	border-radius: 4px;
 	z-index: 2;
 	pointer-events: none;
+}
+
+.iconButton:disabled:hover .buttonLabel,
+.iconButton:disabled:focus-visible .buttonLabel {
+	color: var(--primary-link-color);
+	background-color: var(--disabled-color);
 }
 
 .icon {
