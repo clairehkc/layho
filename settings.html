@@ -2,39 +2,42 @@
 	<div id="settingsContainer">
 		<div id="settingsContentContainer">
 			<h1 id="settingsHeader">Settings</h1>
-			<div id="settingsList">
-				<div class="setting">
-					<h2 class="settingTitle">Language</h2>
-					<div class="settingOption">
-						<label for="speechRecognitionLanguageOptions" class="settingOptionLabel">Translate from:</label>
-						<select id="speechRecognitionLanguageOptions"></select>
+			<form id="settingsForm">
+				<div id="settingsList">
+					<div class="setting">
+						<h2 class="settingTitle">Language</h2>
+						<div class="settingOption">
+							<label for="speechRecognitionLanguageOptions" class="settingOptionLabel">Translate from:</label>
+							<select id="speechRecognitionLanguageOptions"></select>
+						</div>
+						<div class="settingOption">
+							<label for="targetLanguageOptions" class="settingOptionLabel">Translate to:</label>
+							<select id="targetLanguageOptions"></select>
+						</div>
 					</div>
-					<div class="settingOption">
-						<label for="targetLanguageOptions" class="settingOptionLabel">Translate to:</label>
-						<select id="targetLanguageOptions"></select>
+					<div class="setting">
+						<h2 class="settingTitle">Output</h2>
+						<div class="settingOption">
+							<label for="voiceOutputInput" class="settingOptionLabel">Voice</label>
+							<label class="switch">
+								<input id="voiceOutputInput" type="checkbox">
+								<span class="slider"></span>
+							</label>
+						</div>
+					</div>
+					<div class="setting">
+						<h2 class="settingTitle">Mode</h2>
+						<div class="settingOption">
+							<label for="conversationModeInput" class="settingOptionLabel">Conversation</label>
+							<label class="switch">
+								<input id="conversationModeInput" type="checkbox">
+								<span class="slider"></span>
+							</label>
+						</div>
 					</div>
 				</div>
-				<div class="setting">
-					<h2 class="settingTitle">Output</h2>
-					<div class="settingOption">
-						<label for="voiceOutputInput" class="settingOptionLabel">Voice</label>
-						<label class="switch">
-							<input id="voiceOutputInput" type="checkbox">
-							<span class="slider"></span>
-						</label>
-					</div>
-				</div>
-				<div class="setting">
-					<h2 class="settingTitle">Mode</h2>
-					<div class="settingOption">
-						<label for="conversationModeInput" class="settingOptionLabel">Conversation</label>
-						<label class="switch">
-							<input id="conversationModeInput" type="checkbox">
-							<span class="slider"></span>
-						</label>
-					</div>
-				</div>
-			</div>
+				<button id="settingsSubmitButton" class="iconButton" type="submit"><span class="icon submitIcon" aria-hidden="true"></span><span class="buttonLabel">Submit</span></button>
+			</form>
 		</div>
 	</div>
 	<button id="settingsCloseButton" class="settingsCloseButton iconButton iconOnlyButton"><span class="icon backIcon" aria-hidden="true"></span><span class="buttonLabel">Back</span></button>

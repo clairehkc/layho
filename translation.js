@@ -569,6 +569,7 @@ function switchActiveLanguages() {
 
     speechRecognitionLanguageOptions.value = newSpeechRecognitionLanguage;
     targetLanguageOptions.value = newTargetLanguage;
+    updateSavedSettingsValues();
 
     updateLanguageDisplays(newSpeechRecognitionLanguage, newTargetLanguage);
 }

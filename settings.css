@@ -40,9 +40,25 @@
 	background-color: var(--primary-bg-color);
 }
 
+#settingsForm {
+	display: flex;
+	flex-direction: column;
+	width: 100%;
+}
+
 #settingsList {
 	padding: 2vh 0 2vh 0;
 	width: 100%;
+}
+
+#settingsSubmitButton {
+	align-self: flex-end;
+	margin-top: 1vh;
+	color: var(--primary-bg-color);
+}
+
+#settingsSubmitButton:hover:not(:disabled) {
+	color: var(--settings-hover-color);
 }
 
 .setting {

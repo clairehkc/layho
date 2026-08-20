@@ -1,3 +1,8 @@
+const settingsCookieName = "layho_settings";
+const settingsCookieMaxAgeSeconds = 31536000;
+const defaultSpeechRecognitionLanguage = "zh-HK";
+const defaultTargetLanguage = "en-US";
+
 let speechRecognitionLanguageOptions;
 let targetLanguageOptions;
 let voiceOutputInput;
@@ -26,8 +31,79 @@ function getSelectedSettingsValues() {
     ];
 }
 
-function updateSavedSettingsValues() {
+function getPersistedSettings() {
+    const raw = getCookie(settingsCookieName);
+    if (!raw) return undefined;
+    try {
+        return JSON.parse(raw);
+    } catch (error) {
+        console.warn("Unable to read saved settings.", error);
+        return undefined;
+    }
+}
+
+function persistSettings() {
+    setCookie(settingsCookieName, JSON.stringify({
+        speechRecognitionLanguage: speechRecognitionLanguageOptions.value,
+        targetLanguage: targetLanguageOptions.value,
+        voiceOutput: voiceOutputInput.checked,
+        conversationMode: conversationModeInput.checked
+    }), settingsCookieMaxAgeSeconds);
+}
+
+function setSelectValue(select, value, fallback) {
+    if (value) {
+        select.value = value;
+        if (select.value === value) return;
+    }
+    select.value = fallback;
+}
+
+function applyPersistedSettings() {
+    const saved = getPersistedSettings() || {};
+    setSelectValue(
+        speechRecognitionLanguageOptions,
+        saved.speechRecognitionLanguage,
+        defaultSpeechRecognitionLanguage
+    );
+    setSelectValue(
+        targetLanguageOptions,
+        saved.targetLanguage,
+        defaultTargetLanguage
+    );
+    voiceOutputInput.checked = Boolean(saved.voiceOutput);
+    conversationModeInput.checked = Boolean(saved.conversationMode);
+    if (voiceOutputInput.checked && conversationModeInput.checked) {
+        conversationModeInput.checked = false;
+    }
+}
+
+function snapshotSettingsValues() {
     savedSettingsValues = getSelectedSettingsValues();
+}
+
+function updateSavedSettingsValues() {
+    snapshotSettingsValues();
+    persistSettings();
+}
+
+function syncLanguageDisplaysFromSettings() {
+    const fromOption = speechRecognitionLanguageOptions.selectedOptions[0];
+    const toOption = targetLanguageOptions.selectedOptions[0];
+    if (!fromOption || !toOption) return;
+    const fromDisplay = document.getElementById("speechRecognitionLanguageDisplay");
+    const toDisplay = document.getElementById("targetLanguageDisplay");
+    if (fromDisplay) fromDisplay.textContent = fromOption.dataset.displayName;
+    if (toDisplay) toDisplay.textContent = toOption.dataset.displayName;
+}
+
+function restoreSettingsValues() {
+    if (!savedSettingsValues) return;
+    speechRecognitionLanguageOptions.value = savedSettingsValues[0];
+    targetLanguageOptions.value = savedSettingsValues[1];
+    voiceOutputInput.checked = savedSettingsValues[2];
+    conversationModeInput.checked = savedSettingsValues[3];
+    syncLanguageDisplaysFromSettings();
 }
 
 function didSettingsChange() {
@@ -50,24 +126,39 @@ function showSettings(trigger = document.activeElement) {
     setBackgroundInert(true);
     settingsModal.style.display = 'flex';
     settingsModal.setAttribute("aria-hidden", "false");
-    updateSavedSettingsValues();
+    snapshotSettingsValues();
     getSettingsFocusableElements()[0].focus();
 }
 
-function closeSettings(shouldRestoreFocus = true) {
+function hideSettings(shouldRestoreFocus = true) {
     const settingsModal = getSettingsModal();
     const wasOpen = settingsModal.style.display === 'flex';
     settingsModal.style.display = 'none';
     settingsModal.setAttribute("aria-hidden", "true");
     setBackgroundInert(false);
-    if (wasOpen && didSettingsChange()) {
-        restartContinuousTranslation();
-        document.getElementById("speechStatus").textContent = "Settings applied.";
-    }
-    updateSavedSettingsValues();
 
     if (wasOpen && shouldRestoreFocus && settingsTrigger?.isConnected && !settingsTrigger.hidden) {
         settingsTrigger.focus();
+    }
+
+    return wasOpen;
+}
+
+function closeSettings(shouldRestoreFocus = true) {
+    const wasOpen = getSettingsModal().style.display === 'flex';
+    if (wasOpen) {
+        restoreSettingsValues();
+    }
+    hideSettings(shouldRestoreFocus);
+}
+
+function submitSettings() {
+    const didChange = didSettingsChange();
+    updateSavedSettingsValues();
+    hideSettings();
+    if (didChange) {
+        restartContinuousTranslation();
+        document.getElementById("speechStatus").textContent = "Settings applied.";
     }
 }
 
@@ -93,27 +184,22 @@ async function populateLanguageOptions() {
         targetLanguageOptions.appendChild(targetOption);
     }
 
-    speechRecognitionLanguageOptions.value = "zh-HK";
-    targetLanguageOptions.value = "en-US";
+    applyPersistedSettings();
+    updateSavedSettingsValues();
 
-    speechRecognitionLanguageOptions.addEventListener("change", (event) =>  {
-        speechRecognitionLanguageDisplay.textContent = speechRecognitionLanguageOptions.selectedOptions[0].dataset.displayName;
-    });
-    targetLanguageOptions.addEventListener("change", (event) =>  {
-        targetLanguageDisplay.textContent = targetLanguageOptions.selectedOptions[0].dataset.displayName;
-    });
-
-    speechRecognitionLanguageDisplay.textContent = speechRecognitionLanguageOptions.selectedOptions[0].dataset.displayName;
-    targetLanguageDisplay.textContent = targetLanguageOptions.selectedOptions[0].dataset.displayName;
+    speechRecognitionLanguageOptions.addEventListener("change", syncLanguageDisplaysFromSettings);
+    targetLanguageOptions.addEventListener("change", syncLanguageDisplaysFromSettings);
+    syncLanguageDisplaysFromSettings();
 }
 
 whenViewsReady(function () {
     // settings
     speechRecognitionLanguageOptions = document.getElementById("speechRecognitionLanguageOptions");
     targetLanguageOptions = document.getElementById("targetLanguageOptions");
+    voiceOutputInput = document.getElementById("voiceOutputInput");
+    conversationModeInput = document.getElementById("conversationModeInput");
     populateLanguageOptions();
 
-    voiceOutputInput = document.getElementById("voiceOutputInput");
     voiceOutputInput.addEventListener("change", (event) =>  {
         if (voiceOutputInput.checked) {
             // disable conversation mode when voice output is checked
@@ -121,7 +207,6 @@ whenViewsReady(function () {
         }
     });
     
-    conversationModeInput = document.getElementById("conversationModeInput");
     conversationModeInput.addEventListener("change", (event) =>  {
         if (conversationModeInput.checked) {
             // disable voice output when conversation mode is checked
@@ -155,6 +240,11 @@ whenViewsReady(function () {
                 input.click();
             }
         });
+    });
+
+    document.getElementById("settingsForm").addEventListener("submit", function (event) {
+        event.preventDefault();
+        submitSettings();
     });
 
     const settingsCloseButton = document.getElementById("settingsCloseButton");

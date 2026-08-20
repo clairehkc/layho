@@ -8,23 +8,35 @@ function getCookieAttributes() {
     return "Path=/; SameSite=Lax";
 }
 
-function setSignInCookie(token) {
-    document.cookie = `${signInCookieName}=${encodeURIComponent(token)}; ${getCookieAttributes()}; Max-Age=604800`;
-}
-
-function clearSignInCookie() {
-    document.cookie = `${signInCookieName}=; ${getCookieAttributes()}; Max-Age=0`;
-}
-
-function getSignInCookie() {
+function getCookie(name) {
     const value = document.cookie
         .split("; ")
-        .find((row) => row.startsWith(`${signInCookieName}=`))
+        .find((row) => row.startsWith(`${name}=`))
         ?.split("=")
         .slice(1)
         .join("=");
 
     return value ? decodeURIComponent(value) : undefined;
+}
+
+function setCookie(name, value, maxAgeSeconds) {
+    document.cookie = `${name}=${encodeURIComponent(value)}; ${getCookieAttributes()}; Max-Age=${maxAgeSeconds}`;
+}
+
+function clearCookie(name) {
+    document.cookie = `${name}=; ${getCookieAttributes()}; Max-Age=0`;
+}
+
+function setSignInCookie(token) {
+    setCookie(signInCookieName, token, 604800);
+}
+
+function clearSignInCookie() {
+    clearCookie(signInCookieName);
+}
+
+function getSignInCookie() {
+    return getCookie(signInCookieName);
 }
 
 async function fetchApiKey(token) {
