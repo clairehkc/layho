@@ -85,7 +85,7 @@ function scheduleFitTranslationText() {
     fitTranslationTextFrame = requestAnimationFrame(fitTranslationText);
 }
 
-document.addEventListener("DOMContentLoaded", function () {
+whenViewsReady(function () {
     startButton = document.getElementById("startButton");
     stopButton = document.getElementById("stopButton");
 

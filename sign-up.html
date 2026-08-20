@@ -1,0 +1,20 @@
+<div id="signUpModal" role="dialog" aria-modal="true" aria-labelledby="signUpHeader" aria-describedby="signUpDescription" aria-hidden="true" style="display: none">
+	<div id="signUpContainer">
+		<div id="signUpContentContainer">
+			<h1 id="signUpHeader">Sign up</h1>
+			<p id="signUpDescription">Access is currently limited. Sign up and we'll get back to you soon.</p>
+			<form id="signUpForm">
+				<div class="signUpField">
+					<label for="signUpNameInput">Name</label>
+					<input id="signUpNameInput" name="name" type="text" autocomplete="name" required>
+				</div>
+				<div class="signUpField">
+					<label for="signUpEmailInput">Email</label>
+					<input id="signUpEmailInput" name="email" type="email" autocomplete="email" required>
+				</div>
+				<button id="signUpSubmitButton" class="iconButton" type="submit"><span class="icon submitIcon" aria-hidden="true"></span><span class="buttonLabel">Submit</span></button>
+			</form>
+		</div>
+	</div>
+	<button id="signUpCloseButton" class="settingsCloseButton iconButton iconOnlyButton"><span class="icon backIcon" aria-hidden="true"></span><span class="buttonLabel">Back</span></button>
+</div>

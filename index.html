@@ -3,6 +3,10 @@
     <title>Live</title>
     <meta charset="utf-8" />
     <link href="style.css" rel="stylesheet" type="text/css">
+    <link href="intro.css" rel="stylesheet" type="text/css">
+    <link href="settings.css" rel="stylesheet" type="text/css">
+    <link href="sign-up.css" rel="stylesheet" type="text/css">
+    <link href="translation.css" rel="stylesheet" type="text/css">
 </head>
 <body>
 	<div id="contentContainer">
@@ -23,97 +27,15 @@
 				</div>
 			</div>
 		</div>
-		<div id="settingsModal" role="dialog" aria-modal="true" aria-labelledby="settingsHeader" aria-hidden="true" style="display: none">
-			<div id="settingsContainer">
-				<div id="settingsContentContainer">
-					<h1 id="settingsHeader">Settings</h1>
-					<div id="settingsList">
-						<div class="setting">
-							<h2 class="settingTitle">Language</h2>
-							<div class="settingOption">
-								<label for="speechRecognitionLanguageOptions" class="settingOptionLabel">Translate from:</label>
-								<select id="speechRecognitionLanguageOptions"></select>
-							</div>
-							<div class="settingOption">
-								<label for="targetLanguageOptions" class="settingOptionLabel">Translate to:</label>
-								<select id="targetLanguageOptions"></select>
-							</div>
-						</div>
-						<div class="setting">
-							<h2 class="settingTitle">Output</h2>
-							<div class="settingOption">
-								<label for="voiceOutputInput" class="settingOptionLabel">Voice</label>
-								<label class="switch">
-									<input id="voiceOutputInput" type="checkbox">
-									<span class="slider"></span>
-								</label>
-							</div>
-						</div>
-						<div class="setting">
-							<h2 class="settingTitle">Mode</h2>
-							<div class="settingOption">
-								<label for="conversationModeInput" class="settingOptionLabel">Conversation</label>
-								<label class="switch">
-									<input id="conversationModeInput" type="checkbox">
-									<span class="slider"></span>
-								</label>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-			<button id="settingsCloseButton" class="settingsCloseButton iconButton iconOnlyButton"><span class="icon backIcon" aria-hidden="true"></span><span class="buttonLabel">Back</span></button>
-		</div>
-		<div id="signUpModal" role="dialog" aria-modal="true" aria-labelledby="signUpHeader" aria-describedby="signUpDescription" aria-hidden="true" style="display: none">
-			<div id="signUpContainer">
-				<div id="signUpContentContainer">
-					<h1 id="signUpHeader">Sign up</h1>
-					<p id="signUpDescription">Access is currently limited. Sign up and we'll get back to you soon.</p>
-					<form id="signUpForm">
-						<div class="signUpField">
-							<label for="signUpNameInput">Name</label>
-							<input id="signUpNameInput" name="name" type="text" autocomplete="name" required>
-						</div>
-						<div class="signUpField">
-							<label for="signUpEmailInput">Email</label>
-							<input id="signUpEmailInput" name="email" type="email" autocomplete="email" required>
-						</div>
-						<button id="signUpSubmitButton" class="iconButton" type="submit"><span class="icon submitIcon" aria-hidden="true"></span><span class="buttonLabel">Submit</span></button>
-					</form>
-				</div>
-			</div>
-			<button id="signUpCloseButton" class="settingsCloseButton iconButton iconOnlyButton"><span class="icon backIcon" aria-hidden="true"></span><span class="buttonLabel">Back</span></button>
-		</div>
-		<div id="translationContainer" style="display: none">
-			<div id="languageSelectionDisplay">
-				<div id="speechRecognitionLanguageDisplay"></div>
-				<button id="switchLanguageButton" class="iconButton"><span class="icon switchIcon" aria-hidden="true"></span><span class="buttonLabel">Switch</span></button>
-				<div id="targetLanguageDisplay"></div>
-			</div>
-			<div id="translationDisplayContainer">
-				<div id="resultsContainer">
-					<div class="translationTextContainer" id="detected"></div>
-					<div id="separator"></div>
-					<div class="translationTextContainer" id="translated" aria-live="polite" aria-atomic="true"></div>
-				</div>
-			</div>
-			<div id="controlsDivider" aria-hidden="true"></div>
-			<div id="controlsContainer">
-				<button id="homeButton" class="iconButton"><span class="icon backIcon" aria-hidden="true"></span><span class="buttonLabel">Back</span></button>
-				<div id="startStopButtonContainer">
-					<button id="startButton" class="iconButton" aria-keyshortcuts="s"><span class="icon microphoneMutedIcon" aria-hidden="true"></span><span class="buttonLabel">Start translating</span></button>
-					<button id="stopButton" class="iconButton" hidden aria-keyshortcuts="s"><span class="icon microphoneIcon" aria-hidden="true"></span><span class="buttonLabel">Stop translating</span></button>
-				</div>
-				<button id="translateViewSettingsButton" class="iconButton"><span class="icon settingsIcon" aria-hidden="true"></span><span class="buttonLabel">Settings</span></button>
-			</div>
-		</div>
 		<div id="speechStatus" class="visuallyHidden" role="status" aria-live="polite" aria-atomic="true"></div>
 		<div id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
 	</div>
 	<!-- Speech SDK REFERENCE -->
 	<script src="https://aka.ms/csspeech/jsbrowserpackageraw"></script>
 
+	<script src="./LoadViews.js"></script>
 	<script src="./Settings.js"></script>
+	<script src="./SignUp.js"></script>
 	<script src="./index.js"></script>
 	<script src="./Translation.js"></script>
 	<script src="https://accounts.google.com/gsi/client" async defer onload="initGoogleSignIn()"></script>

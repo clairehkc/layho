@@ -1,0 +1,97 @@
+#introContainer {
+	position: relative;
+	width: 100%;
+	height: 92vh;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	margin-top: 8vh;
+}
+
+#introTextContainer {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-wrap: wrap;
+	width: 368px;
+	color: var(--primary-fg-color);
+}
+
+#introTextContainer::after {
+	content: "";
+	width: 100%;
+	min-height: 44px;
+	padding: 12vh 0 2vh;
+}
+
+.introText {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+	padding: 2vh 0 2vh 0;
+}
+
+#helloText {
+	font-size: 8em;
+	padding: 6vh 0 6vh 0;
+}
+
+#signInOutContainer {
+	display: grid;
+	justify-items: center;
+	align-items: center;
+	min-height: 6vh;
+	min-width: 0;
+	overflow: visible;
+}
+
+#signInOutContainer > * {
+	grid-area: 1 / 1;
+}
+
+#nameText {
+	min-height: 1.2em;
+	font-size: 3em;
+	line-height: 1.2;
+}
+
+#signInButton {
+	width: 240px;
+	height: 40px;
+	overflow: hidden;
+	line-height: 0;
+	transform: translateY(4vh);
+}
+
+#signInOutContainer .iconButton:hover:not(:disabled) .buttonLabel,
+#signInOutContainer .iconButton:focus-visible .buttonLabel {
+	bottom: auto;
+	top: calc(100% + 6px);
+}
+
+#introButtonContainer {
+	position: absolute;
+	bottom: 8vh;
+	left: 50%;
+	transform: translateX(-50%);
+	min-height: 4vh;
+	width: calc(240px + 12px);
+	font-size: 2em;
+	flex-direction: row;
+	justify-content: space-between;
+}
+
+#introButtonContainer .iconButton .icon {
+	width: 32px;
+	height: 32px;
+}
+
+#signUpOutButtonContainer {
+	display: grid;
+	width: auto;
+}
+
+#signUpOutButtonContainer > button {
+	grid-area: 1 / 1;
+}

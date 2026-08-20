@@ -105,53 +105,6 @@ function onSignOut() {
     document.getElementById("startAppButton").disabled = true;
 }
 
-let signUpTrigger;
-
-function getSignUpModal() {
-    return document.getElementById("signUpModal");
-}
-
-function getSignUpFocusableElements() {
-    return Array.from(getSignUpModal().querySelectorAll(
-        "button:not([disabled]), input:not([disabled])"
-    ));
-}
-
-function showSignUp(trigger = document.activeElement) {
-    const signUpModal = getSignUpModal();
-    signUpTrigger = trigger;
-    document.getElementById("introContainer").inert = true;
-    document.getElementById("translationContainer").inert = true;
-    signUpModal.style.display = "flex";
-    signUpModal.setAttribute("aria-hidden", "false");
-    document.getElementById("signUpNameInput").focus();
-}
-
-function closeSignUp(shouldRestoreFocus = true) {
-    const signUpModal = getSignUpModal();
-    const wasOpen = signUpModal.style.display === "flex";
-    signUpModal.style.display = "none";
-    signUpModal.setAttribute("aria-hidden", "true");
-    document.getElementById("introContainer").inert = false;
-    document.getElementById("translationContainer").inert = false;
-
-    if (wasOpen && shouldRestoreFocus && signUpTrigger?.isConnected && !signUpTrigger.hidden) {
-        signUpTrigger.focus();
-    }
-}
-
-let toastTimeout;
-
-function showToast(message) {
-    const toast = document.getElementById("toast");
-    toast.textContent = message;
-    toast.classList.add("visible");
-    clearTimeout(toastTimeout);
-    toastTimeout = setTimeout(() => {
-        toast.classList.remove("visible");
-    }, 4000);
-}
-
 function initGoogleSignIn() {
     if (window.location.protocol === "file:") {
         console.error(
@@ -176,7 +129,7 @@ function initGoogleSignIn() {
     );
 }
 
-document.addEventListener("DOMContentLoaded", function () {
+whenViewsReady(function () {
     const signOutButton = document.getElementById("signOutButton");
     signOutButton.addEventListener("click", function () {
         onSignOut();
@@ -185,44 +138,6 @@ document.addEventListener("DOMContentLoaded", function () {
     const signUpButton = document.getElementById("signUpButton");
     signUpButton.addEventListener("click", function () {
         showSignUp(signUpButton);
-    });
-
-    document.getElementById("signUpCloseButton").addEventListener("click", function () {
-        closeSignUp();
-    });
-
-    document.getElementById("signUpForm").addEventListener("submit", function (event) {
-        event.preventDefault();
-        event.target.reset();
-        closeSignUp();
-        showToast("Thanks for signing up! We'll get back to you soon.");
-    });
-
-    document.addEventListener("keydown", (event) => {
-        const signUpModal = getSignUpModal();
-        if (signUpModal.style.display !== "flex") {
-            return;
-        }
-
-        if (event.key === "Escape") {
-            event.preventDefault();
-            closeSignUp();
-            return;
-        }
-
-        if (event.key === "Tab") {
-            const focusableElements = getSignUpFocusableElements();
-            const firstElement = focusableElements[0];
-            const lastElement = focusableElements[focusableElements.length - 1];
-
-            if (event.shiftKey && document.activeElement === firstElement) {
-                event.preventDefault();
-                lastElement.focus();
-            } else if (!event.shiftKey && document.activeElement === lastElement) {
-                event.preventDefault();
-                firstElement.focus();
-            }
-        }
     });
 
     const settingsButton = document.getElementById("settingsButton");
@@ -241,4 +156,3 @@ document.addEventListener("DOMContentLoaded", function () {
 
     checkSignedIn();
 });
-

@@ -47,8 +47,7 @@ function didSettingsChange() {
 function showSettings(trigger = document.activeElement) {
     const settingsModal = getSettingsModal();
     settingsTrigger = trigger;
-    document.getElementById("introContainer").inert = true;
-    document.getElementById("translationContainer").inert = true;
+    setBackgroundInert(true);
     settingsModal.style.display = 'flex';
     settingsModal.setAttribute("aria-hidden", "false");
     updateSavedSettingsValues();
@@ -60,8 +59,7 @@ function closeSettings(shouldRestoreFocus = true) {
     const wasOpen = settingsModal.style.display === 'flex';
     settingsModal.style.display = 'none';
     settingsModal.setAttribute("aria-hidden", "true");
-    document.getElementById("introContainer").inert = false;
-    document.getElementById("translationContainer").inert = false;
+    setBackgroundInert(false);
     if (wasOpen && didSettingsChange()) {
         restartContinuousTranslation();
         document.getElementById("speechStatus").textContent = "Settings applied.";
@@ -109,7 +107,7 @@ async function populateLanguageOptions() {
     targetLanguageDisplay.textContent = targetLanguageOptions.selectedOptions[0].dataset.displayName;
 }
 
-document.addEventListener("DOMContentLoaded", function () {
+whenViewsReady(function () {
     // settings
     speechRecognitionLanguageOptions = document.getElementById("speechRecognitionLanguageOptions");
     targetLanguageOptions = document.getElementById("targetLanguageOptions");
