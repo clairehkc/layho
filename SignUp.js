@@ -1,5 +1,7 @@
 let signUpTrigger;
 let toastTimeout;
+const web3formsAccessKey = "b5ebb5ce-e035-4ca6-b28e-7557996c2a60";
+const web3formsSubmitUrl = "https://api.web3forms.com/submit";
 
 function getSignUpModal() {
     return document.getElementById("signUpModal");
@@ -7,8 +9,30 @@ function getSignUpModal() {
 
 function getSignUpFocusableElements() {
     return Array.from(getSignUpModal().querySelectorAll(
-        "button:not([disabled]), input:not([disabled])"
+        "button:not([disabled]), input:not([disabled]):not([hidden])"
     ));
+}
+
+function setSignUpSubmitting(isSubmitting) {
+    const submitButton = document.getElementById("signUpSubmitButton");
+    submitButton.disabled = isSubmitting;
+    submitButton.querySelector(".buttonLabel").textContent = isSubmitting ? "Submitting" : "Submit";
+}
+
+async function submitSignUp(formData) {
+    formData.append("access_key", web3formsAccessKey);
+    formData.append("subject", "New Layho signup");
+    formData.append("from_name", "Layho");
+
+    const response = await fetch(web3formsSubmitUrl, {
+        method: "POST",
+        body: formData,
+    });
+
+    const result = await response.json();
+    if (!response.ok || result.success === false) {
+        throw new Error(result.message || "Sign-up failed.");
+    }
 }
 
 function showSignUp(trigger = document.activeElement) {
@@ -47,11 +71,23 @@ whenViewsReady(function () {
         closeSignUp();
     });
 
-    document.getElementById("signUpForm").addEventListener("submit", function (event) {
+    document.getElementById("signUpForm").addEventListener("submit", async function (event) {
         event.preventDefault();
-        event.target.reset();
-        closeSignUp();
-        showToast("Thanks for signing up! We'll get back to you soon.");
+        const form = event.target;
+        const formData = new FormData(form);
+
+        setSignUpSubmitting(true);
+        try {
+            await submitSignUp(formData);
+            form.reset();
+            closeSignUp();
+            showToast("Thanks for signing up!");
+        } catch (error) {
+            console.error(error);
+            showToast("Couldn't send your signup. Please try again.");
+        } finally {
+            setSignUpSubmitting(false);
+        }
     });
 
     document.addEventListener("keydown", (event) => {
