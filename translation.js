@@ -11,6 +11,10 @@ let targetLanguage;
 let activeTranslationRecognizer;
 let translationRecognizer1;
 let translationRecognizer2;
+let conversationLanguageRecognizer;
+let expectedConversationLanguage;
+let pendingConversationLanguage;
+let pendingConversationLanguageCount = 0;
 let soundContext = undefined;
 
 let startButton, stopButton;
@@ -30,6 +34,7 @@ try {
     window.console.log("no sound context found, no audio output. " + e);
 }
 
+const CONVERSATION_LANGUAGE_CONFIRMATIONS = 2;
 const MIN_TRANSLATION_FONT_SIZE_PX = 10;
 const TRANSLATION_TEXT_MARGIN_PX = 48;
 
@@ -96,8 +101,6 @@ whenViewsReady(function () {
     new ResizeObserver(scheduleFitTranslationText).observe(translationDisplayContainer);
     window.addEventListener("resize", scheduleFitTranslationText);
 
-    const speechRecognitionLanguageDisplay =  document.getElementById("speechRecognitionLanguageDisplay");
-    const targetLanguageDisplay =  document.getElementById("targetLanguageDisplay");
     const switchLanguageButton = document.getElementById("switchLanguageButton");
 
     startButton.addEventListener("click", function () {
@@ -207,19 +210,27 @@ function getSpeechConfig(sdkConfigType, newSpeechRecognitionLanguage = undefined
 }
 
 function onRecognizing(sender, recognitionEventArgs) {
-    if (sender.speechRecognitionLanguage !== speechRecognitionLanguage) return;
     const result = recognitionEventArgs.result;
-    if (result.text) {
-        detected.textContent = detected.textContent.replace(/(.*)(^|[\r\n]+).*\[\.\.\.\][\r\n]+/, '$1$2')
-            + `${result.text} [...]\r\n`;
-        scheduleFitTranslationText();
-    }
+    if (!result.text || !shouldPresentRecognizer(sender)) return;
+    presentFromRecognizer(sender);
+    detected.textContent = detected.textContent.replace(/(.*)(^|[\r\n]+).*\[\.\.\.\][\r\n]+/, '$1$2')
+        + `${result.text} [...]\r\n`;
+    scheduleFitTranslationText();
 }
 
 function onRecognized(sender, recognitionEventArgs) {
-    if (sender.speechRecognitionLanguage !== speechRecognitionLanguage) return;
+    if (!shouldPresentRecognizer(sender)) return;
     const result = recognitionEventArgs.result;
-    onRecognizedResult(recognitionEventArgs.result);
+    const hasSpeech = result.text && (
+        result.reason === SpeechSDK.ResultReason.RecognizedSpeech
+        || result.reason === SpeechSDK.ResultReason.TranslatedSpeech
+    );
+    if (hasSpeech) {
+        presentFromRecognizer(sender);
+    } else if (sender !== activeTranslationRecognizer) {
+        return;
+    }
+    onRecognizedResult(result);
 }
 
 function onRecognizedResult(result) {
@@ -356,10 +367,105 @@ function doContinuousTranslation(newSpeechRecognitionLanguage = undefined, newTa
 
     // Start the continuous recognition/translation operation.
     newTranslationRecognizer.startContinuousRecognitionAsync();
+    newTranslationRecognizer.layhoSpeechLanguage = speechConfig.speechRecognitionLanguage;
+    newTranslationRecognizer.layhoTargetLanguage = targetLanguage;
     return newTranslationRecognizer;
 }
 
-function startConversationMode() {
+function updateLanguageDisplays(fromLocale, toLocale) {
+    const fromOption = speechRecognitionLanguageOptions.querySelector(`option[value="${fromLocale}"]`);
+    const toOption = targetLanguageOptions.querySelector(`option[value="${toLocale}"]`);
+    document.getElementById("speechRecognitionLanguageDisplay").textContent =
+        fromOption?.dataset.displayName || fromLocale;
+    document.getElementById("targetLanguageDisplay").textContent =
+        toOption?.dataset.displayName || toLocale;
+}
+
+function languagesMatch(detectedLanguage, recognizerLocale) {
+    if (!detectedLanguage || !recognizerLocale) return false;
+    return detectedLanguage.toLowerCase() === recognizerLocale.toLowerCase()
+        || detectedLanguage.toLowerCase().startsWith(`${recognizerLocale.toLowerCase()}-`)
+        || recognizerLocale.toLowerCase().startsWith(`${detectedLanguage.toLowerCase()}-`);
+}
+
+function findRecognizerForLanguage(detectedLanguage) {
+    const recognizers = [translationRecognizer1, translationRecognizer2].filter(Boolean);
+    const exactMatch = recognizers.find((recognizer) =>
+        languagesMatch(detectedLanguage, recognizer.layhoSpeechLanguage)
+    );
+    if (exactMatch) return exactMatch;
+
+    const primary = detectedLanguage.split("-")[0].toLowerCase();
+    const primaryMatches = recognizers.filter((recognizer) =>
+        recognizer.layhoSpeechLanguage?.split("-")[0].toLowerCase() === primary
+    );
+    return primaryMatches.length === 1 ? primaryMatches[0] : undefined;
+}
+
+function shouldPresentRecognizer(recognizer) {
+    if (!conversationModeInput.checked || !translationRecognizer2) {
+        return recognizer === activeTranslationRecognizer;
+    }
+    if (expectedConversationLanguage) {
+        return languagesMatch(expectedConversationLanguage, recognizer.layhoSpeechLanguage);
+    }
+    return recognizer === activeTranslationRecognizer;
+}
+
+function presentFromRecognizer(recognizer) {
+    if (!recognizer || recognizer === activeTranslationRecognizer) return;
+    activeTranslationRecognizer = recognizer;
+    speechRecognitionLanguage = recognizer.layhoSpeechLanguage;
+    updateLanguageDisplays(recognizer.layhoSpeechLanguage, recognizer.layhoTargetLanguage);
+    resetUiForScenarioStart();
+}
+
+function getDetectedLanguage(result) {
+    if (SpeechSDK.AutoDetectSourceLanguageResult) {
+        try {
+            const language = SpeechSDK.AutoDetectSourceLanguageResult.fromResult(result).language;
+            if (language && language !== "Unknown") return language;
+        } catch (error) {
+            console.warn("Unable to read auto-detected language.", error);
+        }
+    }
+    return result.language || result.privLanguage;
+}
+
+function resetConversationLanguageDetection(language) {
+    expectedConversationLanguage = language;
+    pendingConversationLanguage = undefined;
+    pendingConversationLanguageCount = 0;
+}
+
+function applyDetectedConversationLanguage(detectedLanguage, isFinal) {
+    const nextRecognizer = findRecognizerForLanguage(detectedLanguage);
+    if (!nextRecognizer) return;
+
+    const locale = nextRecognizer.layhoSpeechLanguage;
+    if (locale === expectedConversationLanguage) {
+        pendingConversationLanguage = undefined;
+        pendingConversationLanguageCount = 0;
+        return;
+    }
+
+    if (isFinal || (locale === pendingConversationLanguage && pendingConversationLanguageCount + 1 >= CONVERSATION_LANGUAGE_CONFIRMATIONS)) {
+        expectedConversationLanguage = locale;
+        pendingConversationLanguage = undefined;
+        pendingConversationLanguageCount = 0;
+        console.log("conversation mode expecting", locale);
+        return;
+    }
+
+    if (locale === pendingConversationLanguage) {
+        pendingConversationLanguageCount += 1;
+    } else {
+        pendingConversationLanguage = locale;
+        pendingConversationLanguageCount = 1;
+    }
+}
+
+function startConversationMode(language1, language2) {
     // continuous language recognition and automatic switching
     const speechRecognitionConfig = SpeechSDK.SpeechConfig.fromEndpoint(new URL(`wss://${region}.stt.speech.microsoft.com/speech/universal/v2`), apiKey);
     speechRecognitionConfig.setProperty(SpeechSDK.PropertyId.SpeechServiceConnection_LanguageIdMode, "Continuous")
@@ -369,44 +475,59 @@ function startConversationMode() {
         console.error("missing audioConfig");
         return;
     }
-    const autoDetectSourceLanguageConfig = SpeechSDK.AutoDetectSourceLanguageConfig.fromLanguages(["en-US", "zh-HK",]);
-    const speechRecognizer = SpeechSDK.SpeechRecognizer.FromConfig(speechRecognitionConfig, autoDetectSourceLanguageConfig, audioConfig);
+    const autoDetectSourceLanguageConfig = SpeechSDK.AutoDetectSourceLanguageConfig.fromLanguages([language1, language2]);
+    conversationLanguageRecognizer = SpeechSDK.SpeechRecognizer.FromConfig(speechRecognitionConfig, autoDetectSourceLanguageConfig, audioConfig);
 
-    speechRecognizer.startContinuousRecognitionAsync(() => {
-        console.log("speechRecognizer started");
+    conversationLanguageRecognizer.startContinuousRecognitionAsync(() => {
+        console.log("conversation language detector started");
     });
-    speechRecognizer.recognized = async (s, e) => {
+    conversationLanguageRecognizer.recognizing = (s, e) => {
+        applyDetectedConversationLanguage(getDetectedLanguage(e.result), false);
+    };
+    conversationLanguageRecognizer.recognized = (s, e) => {
         if (e.result.reason === SpeechSDK.ResultReason.RecognizedSpeech) {
-            const detectedLanguage = e.result.privLanguage;
-            console.log("speechRecognitionLanguage", speechRecognitionLanguage);
-            console.log("detectedLanguage", detectedLanguage);
-            if (speechRecognitionLanguage && detectedLanguage !== speechRecognitionLanguage) {
-                if (!(translationRecognizer1 && translationRecognizer2)) {
-                    console.error("missing translationRecognizers for automatic switching");
-                    return;
-                }
-
-                if (detectedLanguage == "en-US") {
-                    speechRecognitionLanguage = "en-US";
-                    activeTranslationRecognizer = translationRecognizer2;
-                    console.log("set translationRecognizer2");
-                } else {
-                    speechRecognitionLanguage = "zh-HK";
-                    activeTranslationRecognizer = translationRecognizer1;
-                    console.log("set translationRecognizer1");
-                }
-            }
+            applyDetectedConversationLanguage(getDetectedLanguage(e.result), true);
         }
-    }
+    };
 }
 
 function startContinuousTranslation(newSpeechRecognitionLanguage, newTargetLanguage) {
-    translationRecognizer1 = doContinuousTranslation(newSpeechRecognitionLanguage, newTargetLanguage);
+    const speechLang = newSpeechRecognitionLanguage || speechRecognitionLanguageOptions.value;
+    const targetLang = newTargetLanguage || targetLanguageOptions.value;
+
+    resetConversationLanguageDetection(speechLang);
+    translationRecognizer1 = doContinuousTranslation(speechLang, targetLang);
     activeTranslationRecognizer = translationRecognizer1;
+    speechRecognitionLanguage = speechLang;
+    updateLanguageDisplays(speechLang, targetLang);
     if (conversationModeInput.checked) {
-        translationRecognizer2 = doContinuousTranslation(newTargetLanguage, newSpeechRecognitionLanguage);
-        startConversationMode();
+        translationRecognizer2 = doContinuousTranslation(targetLang, speechLang);
+        activeTranslationRecognizer = translationRecognizer1;
+        speechRecognitionLanguage = speechLang;
+        startConversationMode(speechLang, targetLang);
     }
+}
+
+function stopAndCloseRecognizer(recognizer, onDone) {
+    if (!recognizer) {
+        onDone();
+        return;
+    }
+    recognizer.stopContinuousRecognitionAsync(
+        function () {
+            recognizer.close();
+            onDone();
+        },
+        function (error) {
+            console.error("error stopping recognizer", error);
+            try {
+                recognizer.close();
+            } catch (closeError) {
+                console.error("error closing recognizer", closeError);
+            }
+            onDone();
+        }
+    );
 }
 
 /*
@@ -415,31 +536,31 @@ function startContinuousTranslation(newSpeechRecognitionLanguage, newTargetLangu
  */
 function stopContinuousTranslation(isRestarting = false) {
     console.log("stopContinuousTranslation");
-    if (!activeTranslationRecognizer) return;
+    const recognizersToStop = [
+        translationRecognizer1,
+        translationRecognizer2,
+        conversationLanguageRecognizer
+    ].filter(Boolean);
+    if (recognizersToStop.length === 0) return;
 
-    const newSpeechRecognitionLanguage = speechRecognitionLanguageOptions.value;
-    const newTargetLanguage = targetLanguageOptions.value;
+    const speechLang = speechRecognitionLanguageOptions.value;
+    const targetLang = targetLanguageOptions.value;
 
-    translationRecognizer1.stopContinuousRecognitionAsync(
-        function () {
-            translationRecognizer1.close();
-            translationRecognizer1 = undefined;
-            activeTranslationRecognizer = undefined;
-            if (isRestarting) startContinuousTranslation(newSpeechRecognitionLanguage, newTargetLanguage);
-        }
-    );
-
-    if (translationRecognizer2) {
-        translationRecognizer2.stopContinuousRecognitionAsync(
-            function () {
-                translationRecognizer2.close();
-                translationRecognizer2 = undefined;
-                if (isRestarting) startContinuousTranslation(newTargetLanguage, newSpeechRecognitionLanguage);
-            }
-        );
-    }
-
+    translationRecognizer1 = undefined;
+    translationRecognizer2 = undefined;
+    conversationLanguageRecognizer = undefined;
+    activeTranslationRecognizer = undefined;
+    resetConversationLanguageDetection(undefined);
     isListening = false;
+
+    let pendingStops = recognizersToStop.length;
+    const onStopped = function () {
+        pendingStops -= 1;
+        if (pendingStops > 0) return;
+        if (isRestarting) startContinuousTranslation(speechLang, targetLang);
+    };
+
+    recognizersToStop.forEach((recognizer) => stopAndCloseRecognizer(recognizer, onStopped));
 }
 
 function switchActiveLanguages() {
@@ -449,8 +570,7 @@ function switchActiveLanguages() {
     speechRecognitionLanguageOptions.value = newSpeechRecognitionLanguage;
     targetLanguageOptions.value = newTargetLanguage;
 
-    speechRecognitionLanguageDisplay.textContent = speechRecognitionLanguageOptions.selectedOptions[0].dataset.displayName;
-    targetLanguageDisplay.textContent = targetLanguageOptions.selectedOptions[0].dataset.displayName;
+    updateLanguageDisplays(newSpeechRecognitionLanguage, newTargetLanguage);
 }
 
 function onStartKeyPress() {
