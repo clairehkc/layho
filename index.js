@@ -145,9 +145,11 @@ function initGoogleSignIn() {
         callback: handleCredentialResponse,
         use_fedcm_for_button: false,
     });
+    const introTextContainer = document.getElementById("introTextContainer");
+    const buttonWidth = Math.max(200, Math.min(240, Math.floor(introTextContainer.clientWidth || 240)));
     google.accounts.id.renderButton(
         document.getElementById("signInButton"),
-        { theme: "outline", size: "large", type: "standard", text: "signin_with", width: 240 }
+        { theme: "outline", size: "large", type: "standard", text: "signin_with", width: buttonWidth }
     );
 }
 

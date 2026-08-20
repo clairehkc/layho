@@ -2,10 +2,12 @@
 	position: relative;
 	width: 100%;
 	height: 92vh;
+	height: 92dvh;
 	display: flex;
 	align-items: center;
 	justify-content: center;
 	margin-top: 8vh;
+	margin-top: 8dvh;
 }
 
 #introTextContainer {
@@ -13,7 +15,7 @@
 	align-items: center;
 	justify-content: center;
 	flex-wrap: wrap;
-	width: 368px;
+	width: min(368px, calc(100% - 2rem));
 	color: var(--primary-fg-color);
 }
 
@@ -22,6 +24,7 @@
 	width: 100%;
 	min-height: 44px;
 	padding: 12vh 0 2vh;
+	padding: 12dvh 0 2dvh;
 }
 
 .introText {
@@ -30,11 +33,14 @@
 	justify-content: center;
 	width: 100%;
 	padding: 2vh 0 2vh 0;
+	padding: 2dvh 0;
 }
 
 #helloText {
 	font-size: 8em;
 	padding: 6vh 0 6vh 0;
+	padding: 6dvh 0;
+	max-width: 100%;
 }
 
 #signInOutContainer {
@@ -42,6 +48,7 @@
 	justify-items: center;
 	align-items: center;
 	min-height: 6vh;
+	min-height: 6dvh;
 	min-width: 0;
 	overflow: visible;
 }
@@ -54,14 +61,18 @@
 	min-height: 1.2em;
 	font-size: 3em;
 	line-height: 1.2;
+	max-width: 100%;
+	text-align: center;
+	overflow-wrap: break-word;
 }
 
 #signInButton {
-	width: 240px;
+	width: min(240px, 100%);
 	height: 40px;
 	overflow: hidden;
 	line-height: 0;
 	transform: translateY(4vh);
+	transform: translateY(4dvh);
 }
 
 #signInOutContainer .iconButton:hover:not(:disabled) .buttonLabel,
@@ -72,11 +83,13 @@
 
 #introButtonContainer {
 	position: absolute;
-	bottom: 8vh;
+	bottom: max(8vh, env(safe-area-inset-bottom));
+	bottom: max(8dvh, env(safe-area-inset-bottom));
 	left: 50%;
 	transform: translateX(-50%);
 	min-height: 4vh;
-	width: calc(240px + 12px);
+	min-height: 4dvh;
+	width: min(calc(240px + 12px), calc(100% - 2rem));
 	font-size: 2em;
 	flex-direction: row;
 	justify-content: space-between;
