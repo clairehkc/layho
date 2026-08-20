@@ -46,7 +46,7 @@ async function fetchApiKey(token) {
             onSignIn(json.body.name);
             apiKey = json.body.key;
         } else {
-            document.getElementById("signInButton").style.display = 'flex';
+            showSignInControls();
         }
 
         return apiKey;
@@ -55,11 +55,24 @@ async function fetchApiKey(token) {
     }
 }
 
+function showSignInControls() {
+    document.getElementById("signInButton").style.display = 'flex';
+}
+
+function hideSignInControls() {
+    document.getElementById("signInButton").style.display = 'none';
+}
+
+function updateAuthActionButton(isSignedIn) {
+    document.getElementById("signUpButton").hidden = isSignedIn;
+    document.getElementById("signOutButton").hidden = !isSignedIn;
+}
+
 function handleCredentialResponse(response) {
     setSignInCookie(response.credential);
     fetchApiKey(response.credential);
-    document.getElementById("signInButton").style.display = 'none';
-    document.getElementById("signOutButton").style.display = 'flex';
+    hideSignInControls();
+    updateAuthActionButton(true);
 }
 
 function checkSignedIn() {
@@ -68,14 +81,16 @@ function checkSignedIn() {
     if (savedToken) {
         fetchApiKey(savedToken);
     } else {
-        document.getElementById("signInButton").style.display = 'flex';
+        showSignInControls();
+        updateAuthActionButton(false);
     }
 }
 
 function onSignIn(name) {
     document.getElementById("nameText").textContent = name;
     document.getElementById("startAppButton").disabled = false;
-    document.getElementById("signOutButton").style.display = 'flex';
+    hideSignInControls();
+    updateAuthActionButton(true);
 }
 
 function onSignOut() {
@@ -84,10 +99,57 @@ function onSignOut() {
         google.accounts.id.disableAutoSelect();
     }
     apiKey = undefined;
-    document.getElementById("signOutButton").style.display = 'none';
-    document.getElementById("signInButton").style.display = 'flex';
+    updateAuthActionButton(false);
+    showSignInControls();
     document.getElementById("nameText").textContent = "";
     document.getElementById("startAppButton").disabled = true;
+}
+
+let signUpTrigger;
+
+function getSignUpModal() {
+    return document.getElementById("signUpModal");
+}
+
+function getSignUpFocusableElements() {
+    return Array.from(getSignUpModal().querySelectorAll(
+        "button:not([disabled]), input:not([disabled])"
+    ));
+}
+
+function showSignUp(trigger = document.activeElement) {
+    const signUpModal = getSignUpModal();
+    signUpTrigger = trigger;
+    document.getElementById("introContainer").inert = true;
+    document.getElementById("translationContainer").inert = true;
+    signUpModal.style.display = "flex";
+    signUpModal.setAttribute("aria-hidden", "false");
+    document.getElementById("signUpNameInput").focus();
+}
+
+function closeSignUp(shouldRestoreFocus = true) {
+    const signUpModal = getSignUpModal();
+    const wasOpen = signUpModal.style.display === "flex";
+    signUpModal.style.display = "none";
+    signUpModal.setAttribute("aria-hidden", "true");
+    document.getElementById("introContainer").inert = false;
+    document.getElementById("translationContainer").inert = false;
+
+    if (wasOpen && shouldRestoreFocus && signUpTrigger?.isConnected && !signUpTrigger.hidden) {
+        signUpTrigger.focus();
+    }
+}
+
+let toastTimeout;
+
+function showToast(message) {
+    const toast = document.getElementById("toast");
+    toast.textContent = message;
+    toast.classList.add("visible");
+    clearTimeout(toastTimeout);
+    toastTimeout = setTimeout(() => {
+        toast.classList.remove("visible");
+    }, 4000);
 }
 
 function initGoogleSignIn() {
@@ -118,6 +180,49 @@ document.addEventListener("DOMContentLoaded", function () {
     const signOutButton = document.getElementById("signOutButton");
     signOutButton.addEventListener("click", function () {
         onSignOut();
+    });
+
+    const signUpButton = document.getElementById("signUpButton");
+    signUpButton.addEventListener("click", function () {
+        showSignUp(signUpButton);
+    });
+
+    document.getElementById("signUpCloseButton").addEventListener("click", function () {
+        closeSignUp();
+    });
+
+    document.getElementById("signUpForm").addEventListener("submit", function (event) {
+        event.preventDefault();
+        event.target.reset();
+        closeSignUp();
+        showToast("Thanks for signing up! We'll get back to you soon.");
+    });
+
+    document.addEventListener("keydown", (event) => {
+        const signUpModal = getSignUpModal();
+        if (signUpModal.style.display !== "flex") {
+            return;
+        }
+
+        if (event.key === "Escape") {
+            event.preventDefault();
+            closeSignUp();
+            return;
+        }
+
+        if (event.key === "Tab") {
+            const focusableElements = getSignUpFocusableElements();
+            const firstElement = focusableElements[0];
+            const lastElement = focusableElements[focusableElements.length - 1];
+
+            if (event.shiftKey && document.activeElement === firstElement) {
+                event.preventDefault();
+                lastElement.focus();
+            } else if (!event.shiftKey && document.activeElement === lastElement) {
+                event.preventDefault();
+                firstElement.focus();
+            }
+        }
     });
 
     const settingsButton = document.getElementById("settingsButton");

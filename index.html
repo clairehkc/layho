@@ -9,12 +9,15 @@
 		<div id="introContainer">
 			<div id="introTextContainer">
 				<div class="introText" id="helloText">Layho</div>
-				<div class="introText" id="nameText"></div>
 				<div class="introText" id="signInOutContainer">
+					<div id="nameText"></div>
 					<div id="signInButton" style="display: none"></div>
-					<button id="signOutButton" class="iconButton" style="display: none"><span class="icon signOutIcon" aria-hidden="true"></span><span class="buttonLabel">Sign out</span></button>
 				</div>
-				<div class="introText" id="settingsStartButtonContainer">	
+				<div class="introText" id="introButtonContainer">	
+					<div id="signUpOutButtonContainer">
+						<button id="signUpButton" class="iconButton"><span class="icon signUpIcon" aria-hidden="true"></span><span class="buttonLabel">Sign up</span></button>
+						<button id="signOutButton" class="iconButton" hidden><span class="icon signOutIcon" aria-hidden="true"></span><span class="buttonLabel">Sign out</span></button>
+					</div>
 					<button id="settingsButton" class="iconButton"><span class="icon settingsIcon" aria-hidden="true"></span><span class="buttonLabel">Settings</span></button>
 					<button id="startAppButton" class="iconButton" disabled><span class="icon startIcon" aria-hidden="true"></span><span class="buttonLabel">Start</span></button>
 				</div>
@@ -61,6 +64,26 @@
 			</div>
 			<button id="settingsCloseButton" class="settingsCloseButton iconButton iconOnlyButton"><span class="icon backIcon" aria-hidden="true"></span><span class="buttonLabel">Back</span></button>
 		</div>
+		<div id="signUpModal" role="dialog" aria-modal="true" aria-labelledby="signUpHeader" aria-describedby="signUpDescription" aria-hidden="true" style="display: none">
+			<div id="signUpContainer">
+				<div id="signUpContentContainer">
+					<h1 id="signUpHeader">Sign up</h1>
+					<p id="signUpDescription">Access is currently limited. Sign up and we'll get back to you soon.</p>
+					<form id="signUpForm">
+						<div class="signUpField">
+							<label for="signUpNameInput">Name</label>
+							<input id="signUpNameInput" name="name" type="text" autocomplete="name" required>
+						</div>
+						<div class="signUpField">
+							<label for="signUpEmailInput">Email</label>
+							<input id="signUpEmailInput" name="email" type="email" autocomplete="email" required>
+						</div>
+						<button id="signUpSubmitButton" class="iconButton" type="submit"><span class="icon submitIcon" aria-hidden="true"></span><span class="buttonLabel">Submit</span></button>
+					</form>
+				</div>
+			</div>
+			<button id="signUpCloseButton" class="settingsCloseButton iconButton iconOnlyButton"><span class="icon backIcon" aria-hidden="true"></span><span class="buttonLabel">Back</span></button>
+		</div>
 		<div id="translationContainer" style="display: none">
 			<div id="languageSelectionDisplay">
 				<div id="speechRecognitionLanguageDisplay"></div>
@@ -85,6 +108,7 @@
 			</div>
 		</div>
 		<div id="speechStatus" class="visuallyHidden" role="status" aria-live="polite" aria-atomic="true"></div>
+		<div id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
 	</div>
 	<!-- Speech SDK REFERENCE -->
 	<script src="https://aka.ms/csspeech/jsbrowserpackageraw"></script>

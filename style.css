@@ -61,6 +61,7 @@ body {
 }
 
 #introContainer {
+	position: relative;
 	width: 100%;
 	height: 92vh;
 	display: flex;
@@ -78,6 +79,13 @@ body {
 	color: var(--primary-fg-color);
 }
 
+#introTextContainer::after {
+	content: "";
+	width: 100%;
+	min-height: 44px;
+	padding: 12vh 0 2vh;
+}
+
 .introText {
 	display: flex;
     align-items: center;
@@ -91,19 +99,23 @@ body {
 	padding: 6vh 0 6vh 0;
 }
 
+#signInOutContainer {
+	display: grid;
+	justify-items: center;
+	align-items: center;
+	min-height: 6vh;
+	min-width: 0;
+	overflow: visible;
+}
+
+#signInOutContainer > * {
+	grid-area: 1 / 1;
+}
+
 #nameText {
-	height: 6vh;
 	min-height: 1.2em;
 	font-size: 3em;
 	line-height: 1.2;
-	padding-bottom: 0.5vh;
-}
-
-#signInOutContainer {
-	height: 40px;
-	min-height: 40px;
-	min-width: 0;
-	overflow: visible;
 }
 
 #signInButton {
@@ -208,6 +220,8 @@ button[hidden] {
 
 #settingsCloseButton:hover:not(:disabled) .buttonLabel,
 #settingsCloseButton:focus-visible .buttonLabel,
+#signUpCloseButton:hover:not(:disabled) .buttonLabel,
+#signUpCloseButton:focus-visible .buttonLabel,
 #languageSelectionDisplay .iconButton:hover:not(:disabled) .buttonLabel,
 #languageSelectionDisplay .iconButton:focus-visible .buttonLabel,
 #signInOutContainer .iconButton:hover:not(:disabled) .buttonLabel,
@@ -217,7 +231,9 @@ button[hidden] {
 }
 
 #settingsModal .iconButton:hover:not(:disabled) .buttonLabel,
-#settingsModal .iconButton:focus-visible .buttonLabel {
+#settingsModal .iconButton:focus-visible .buttonLabel,
+#signUpModal .iconButton:hover:not(:disabled) .buttonLabel,
+#signUpModal .iconButton:focus-visible .buttonLabel {
 	color: var(--primary-fg-color);
 	background-color: var(--primary-bg-color);
 }
@@ -266,6 +282,12 @@ button[hidden] {
 	background-color: currentColor;
 }
 
+.signUpIcon {
+	mask: url(icons/sign-up.svg) no-repeat center / contain;
+	-webkit-mask: url(icons/sign-up.svg) no-repeat center / contain;
+	background-color: currentColor;
+}
+
 .switchIcon {
 	mask: url(icons/switch.svg) no-repeat center / contain;
 	-webkit-mask: url(icons/switch.svg) no-repeat center / contain;
@@ -278,21 +300,40 @@ button[hidden] {
 	background-color: currentColor;
 }
 
-#settingsStartButtonContainer {
-	min-height: 4vh;
-	padding-top: 6vh;
-	font-size: 2em;
-	flex-direction: row;
-	justify-content: center;
-	gap: 6em;
+.submitIcon {
+	mask: url(icons/submit.svg) no-repeat center / contain;
+	-webkit-mask: url(icons/submit.svg) no-repeat center / contain;
+	background-color: currentColor;
 }
 
-#settingsStartButtonContainer .iconButton .icon {
+#introButtonContainer {
+	position: absolute;
+	bottom: 8vh;
+	left: 50%;
+	transform: translateX(-50%);
+	min-height: 4vh;
+	width: calc(240px + 12px);
+	font-size: 2em;
+	flex-direction: row;
+	justify-content: space-between;
+}
+
+#introButtonContainer .iconButton .icon {
 	width: 32px;
 	height: 32px;
 }
 
-#settingsModal {
+#signUpOutButtonContainer {
+	display: grid;
+	width: auto;
+}
+
+#signUpOutButtonContainer > button {
+	grid-area: 1 / 1;
+}
+
+#settingsModal,
+#signUpModal {
 	position: fixed;
 	inset: 0;
 	width: 100%;
@@ -302,7 +343,8 @@ button[hidden] {
 	color: var(--primary-bg-color);
 }
 
-#settingsContainer {
+#settingsContainer,
+#signUpContainer {
 	width: 100%;
 	height: 100vh;
 	display: flex;
@@ -310,16 +352,25 @@ button[hidden] {
 	justify-content: center;
 }
 
-#settingsContentContainer {
+#settingsContentContainer,
+#signUpContentContainer {
 	display: flex;
 	align-items: center;
 	flex-wrap: wrap;
 	width: 328px;
 }
 
-#settingsHeader {
+#settingsHeader,
+#signUpHeader {
 	font-size: 2.4em;
 	margin: 0;
+}
+
+#signUpDescription {
+	width: 100%;
+	font-size: 1.2em;
+	margin: 0;
+	padding: 3vh 0 0 0;
 }
 
 .settingsCloseButton {
@@ -334,8 +385,15 @@ button.settingsCloseButton:hover:not(:disabled) {
 	color: var(--settings-hover-color);
 }
 
-#settingsList {
+#settingsList,
+#signUpForm {
 	padding: 2vh 0 2vh 0;
+	width: 100%;
+}
+
+#signUpForm {
+	display: flex;
+	flex-direction: column;
 }
 
 .setting {
@@ -369,6 +427,47 @@ button.settingsCloseButton:hover:not(:disabled) {
 select {
 	height: 2em;
 	width: 12em;
+}
+
+.signUpField {
+	display: flex;
+	flex-direction: column;
+	gap: 0.75vh;
+	width: 100%;
+	padding: 2vh 0;
+}
+
+.signUpField label {
+	font-size: 1.4em;
+}
+
+.signUpField input {
+	font-family: "Times New Roman", Times, serif;
+	font-size: 1.2em;
+	height: 2em;
+	width: 100%;
+	padding: 4px 0;
+	color: var(--primary-bg-color);
+	background-color: transparent;
+	border: none;
+	border-bottom: 2px solid var(--primary-bg-color);
+	outline: none;
+	box-sizing: border-box;
+}
+
+.signUpField input:focus-visible {
+	outline: 3px solid var(--secondary-link-color);
+	outline-offset: 3px;
+}
+
+#signUpSubmitButton {
+	align-self: flex-end;
+	margin-top: 1vh;
+	color: var(--primary-bg-color);
+}
+
+#signUpSubmitButton:hover:not(:disabled) {
+	color: var(--settings-hover-color);
 }
 
 #translationContainer {
@@ -529,5 +628,29 @@ input:checked + .slider:before {
 	overflow: hidden;
 	clip: rect(0, 0, 0, 0);
 	white-space: nowrap;
+	border: 0;
+}
+
+#toast {
+	position: fixed;
+	bottom: 24px;
+	left: 50%;
+	transform: translateX(-50%) translateY(12px);
+	z-index: 2;
+	padding: 12px 20px;
+	background-color: var(--primary-fg-color);
+	color: var(--primary-bg-color);
+	border-radius: 10px;
+	font-family: "Times New Roman", Times, serif;
+	font-size: 1.2em;
+	opacity: 0;
+	pointer-events: none;
+	transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+#toast.visible {
+	opacity: 1;
+	transform: translateX(-50%) translateY(0);
+}
 	border: 0;
 }
