@@ -78,12 +78,30 @@
 }
 
 .settingsPrivacyLink {
-	display: block;
-	width: 100%;
+	display: inline-flex;
+	align-items: center;
+	gap: 0.35em;
+	width: auto;
+	max-width: 100%;
 	color: var(--primary-link-color);
-	font-size: 1.4em;
+	font-size: 1em;
+	text-decoration: none;
+}
+
+.settingsPrivacyLinkText {
 	text-decoration: underline;
 	text-underline-offset: 3px;
+}
+
+.settingsPrivacyLink .icon {
+	width: 0.9em;
+	height: 0.9em;
+}
+
+.setting.settingsLegalLinks {
+	flex-direction: column;
+	align-items: flex-start;
+	margin-top: 0.5em;
 }
 
 .settingsPrivacyLink + .settingsPrivacyLink {

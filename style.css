@@ -265,6 +265,12 @@ button[hidden] {
 	background-color: currentColor;
 }
 
+.openInNewIcon {
+	mask: url(icons/open-in-new.svg) no-repeat center / contain;
+	-webkit-mask: url(icons/open-in-new.svg) no-repeat center / contain;
+	background-color: currentColor;
+}
+
 .settingsCloseButton {
 	position: absolute;
 	top: max(16px, env(safe-area-inset-top));
