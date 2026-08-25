@@ -2,6 +2,7 @@ const signInCookieName = "layho_jwt";
 const googleClientId = "699001412765-r6d8ck46h18u9uk7b4dlddncospqcci1.apps.googleusercontent.com";
 const googleNonceStorageKey = "layho_google_nonce";
 const googleStateStorageKey = "layho_google_state";
+const loginUrl = "https://7txxt2ts1e.execute-api.us-west-1.amazonaws.com/prod/loginLayho";
 
 function getCookieAttributes() {
     if (window.isSecureContext) {
@@ -42,7 +43,6 @@ function getSignInCookie() {
 }
 
 async function fetchApiKey(token) {
-    const loginUrl = "https://7txxt2ts1e.execute-api.us-west-1.amazonaws.com/stage/loginLayho";
     try {
         const response = await fetch(loginUrl, {
             headers: {
