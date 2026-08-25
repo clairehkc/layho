@@ -25,6 +25,7 @@
 	min-height: 44px;
 	padding: 12vh 0 2vh;
 	padding: 12dvh 0 2dvh;
+	pointer-events: none;
 }
 
 .introText {
@@ -44,6 +45,8 @@
 }
 
 #signInOutContainer {
+	position: relative;
+	z-index: 1;
 	display: grid;
 	justify-items: center;
 	align-items: center;
@@ -66,16 +69,38 @@
 	overflow-wrap: break-word;
 }
 
-#signInButton {
+#signInButtonHost {
+	position: relative;
+	z-index: 1;
+	margin-top: 4vh;
+	margin-top: 4dvh;
 	width: min(240px, 100%);
 	height: 40px;
-	overflow: hidden;
-	line-height: 0;
-	transform: translateY(4vh);
-	transform: translateY(4dvh);
 }
 
-#signInButton .googleRedirectButton {
+#signInButtonHost[hidden] {
+	display: none !important;
+}
+
+#signInButtonHost:focus-within {
+	outline: 2px solid var(--secondary-link-color);
+	outline-offset: 2px;
+	border-radius: 4px;
+}
+
+#googleGisButton {
+	position: absolute;
+	inset: 0;
+	z-index: 2;
+	overflow: hidden;
+	opacity: 0.01;
+}
+
+#googleGisButton:empty {
+	display: none;
+}
+
+#signInButton {
 	width: 100%;
 	height: 40px;
 	padding: 0 12px;
@@ -90,14 +115,18 @@
 	gap: 8px;
 }
 
-#signInButton .googleRedirectButton:hover:not(:disabled),
-#signInButton .googleRedirectButton:focus-visible {
+#signInButton:hover:not(:disabled),
+#signInButton:focus-visible {
 	color: #3c4043;
 	background-color: #f7f8f8;
 	box-shadow: 0 1px 2px rgba(60, 64, 67, 0.3);
 }
 
-#signInButton .googleRedirectButton .googleLogo {
+#signInButton:focus-visible {
+	outline: none;
+}
+
+#signInButton .googleLogo {
 	width: 18px;
 	height: 18px;
 	flex-shrink: 0;

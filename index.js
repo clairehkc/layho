@@ -70,11 +70,17 @@ async function fetchApiKey(token) {
 }
 
 function showSignInControls() {
-    document.getElementById("signInButton").style.display = 'flex';
+    document.getElementById("signInButtonHost").hidden = false;
 }
 
 function hideSignInControls() {
-    document.getElementById("signInButton").style.display = 'none';
+    document.getElementById("signInButtonHost").hidden = true;
+}
+
+function needsRedirectSignIn() {
+    const userAgent = navigator.userAgent || "";
+    return /iPad|iPhone|iPod/.test(userAgent)
+        || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
 }
 
 function updateAuthActionButton(isSignedIn) {
@@ -87,12 +93,6 @@ function handleCredentialResponse(response) {
     fetchApiKey(response.credential);
     hideSignInControls();
     updateAuthActionButton(true);
-}
-
-function needsRedirectSignIn() {
-    const userAgent = navigator.userAgent || "";
-    return /iPad|iPhone|iPod/.test(userAgent)
-        || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
 }
 
 function randomOAuthValue() {
@@ -109,6 +109,9 @@ function getGoogleRedirectUri() {
     const redirectUrl = new URL(".", window.location.href);
     redirectUrl.search = "";
     redirectUrl.hash = "";
+    if (redirectUrl.pathname === "/") {
+        return redirectUrl.origin;
+    }
     return redirectUrl.href;
 }
 
@@ -134,13 +137,13 @@ function notifyGoogleSignInError(message) {
     }
 }
 
-function startGoogleRedirectSignIn() {
+function getGoogleAuthUrl() {
     const nonce = randomOAuthValue();
     const state = randomOAuthValue();
     sessionStorage.setItem(googleNonceStorageKey, nonce);
     sessionStorage.setItem(googleStateStorageKey, state);
 
-    const params = new URLSearchParams({
+    return `https://accounts.google.com/o/oauth2/v2/auth?${new URLSearchParams({
         client_id: googleClientId,
         redirect_uri: getGoogleRedirectUri(),
         response_type: "id_token",
@@ -148,48 +151,27 @@ function startGoogleRedirectSignIn() {
         nonce,
         state,
         prompt: "select_account",
-    });
-    window.location.assign(`https://accounts.google.com/o/oauth2/v2/auth?${params}`);
+    })}`;
 }
 
-function renderRedirectSignInButton() {
-    const container = document.getElementById("signInButton");
-    if (!container || container.querySelector("[data-google-redirect-button]")) {
-        return;
-    }
-
-    container.replaceChildren();
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = "googleRedirectButton";
-    button.dataset.googleRedirectButton = "true";
-    button.setAttribute("aria-label", "Sign in with Google");
-    button.innerHTML = '<svg class="googleLogo" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg><span>Sign in with Google</span>';
-    button.addEventListener("click", startGoogleRedirectSignIn);
-    container.appendChild(button);
-}
-
-function consumeGoogleRedirectResult() {
-    const hashParams = new URLSearchParams(window.location.hash.slice(1));
-    const queryParams = new URLSearchParams(window.location.search);
-    const error = queryParams.get("error") || hashParams.get("error");
-    const idToken = hashParams.get("id_token");
-    const state = hashParams.get("state") || queryParams.get("state");
-
-    if (!error && !idToken) {
+function completeGoogleAuthResult({ idToken, state, error }) {
+    const expectedState = sessionStorage.getItem(googleStateStorageKey);
+    const expectedNonce = sessionStorage.getItem(googleNonceStorageKey);
+    if (!expectedState && !expectedNonce) {
         return false;
     }
 
-    const expectedState = sessionStorage.getItem(googleStateStorageKey);
-    const expectedNonce = sessionStorage.getItem(googleNonceStorageKey);
     sessionStorage.removeItem(googleStateStorageKey);
     sessionStorage.removeItem(googleNonceStorageKey);
-    clearOAuthParamsFromUrl();
 
     if (error) {
         if (error !== "access_denied") {
             notifyGoogleSignInError(`Google Sign-In failed: ${error}`);
         }
+        return false;
+    }
+
+    if (!idToken) {
         return false;
     }
 
@@ -210,6 +192,116 @@ function consumeGoogleRedirectResult() {
 
     handleCredentialResponse({ credential: idToken });
     return true;
+}
+
+function startGoogleRedirectSignIn() {
+    window.location.assign(getGoogleAuthUrl());
+}
+
+function watchGoogleSignInPopup(popup) {
+    const timer = setInterval(() => {
+        if (!popup || popup.closed) {
+            clearInterval(timer);
+            return;
+        }
+
+        try {
+            const popupUrl = new URL(popup.location.href);
+            if (popupUrl.origin !== window.location.origin) {
+                return;
+            }
+
+            const hashParams = new URLSearchParams(popupUrl.hash.slice(1));
+            const queryParams = new URLSearchParams(popupUrl.search);
+            const idToken = hashParams.get("id_token");
+            const error = queryParams.get("error") || hashParams.get("error");
+            const state = hashParams.get("state") || queryParams.get("state");
+            if (!idToken && !error) {
+                return;
+            }
+
+            popup.close();
+            clearInterval(timer);
+            completeGoogleAuthResult({ idToken, state, error });
+        } catch (error) {
+            // The popup stays on accounts.google.com until it redirects back.
+        }
+    }, 200);
+}
+
+function startGooglePopupSignIn() {
+    window.google?.accounts?.id?.cancel?.();
+
+    const width = 500;
+    const height = 640;
+    const left = Math.round(window.screenX + (window.outerWidth - width) / 2);
+    const top = Math.round(window.screenY + (window.outerHeight - height) / 2);
+    const popup = window.open(
+        getGoogleAuthUrl(),
+        "layho_google_signin",
+        `popup=yes,width=${width},height=${height},left=${left},top=${top}`
+    );
+
+    if (!popup) {
+        notifyGoogleSignInError("Couldn't open Google Sign-In. Allow popups for this site.");
+        return;
+    }
+
+    popup.focus();
+    watchGoogleSignInPopup(popup);
+}
+
+function startGoogleSignIn() {
+    if (needsRedirectSignIn() || !window.google?.accounts?.id) {
+        startGoogleRedirectSignIn();
+        return;
+    }
+
+    startGooglePopupSignIn();
+}
+
+function renderGisOverlayButton() {
+    const overlay = document.getElementById("googleGisButton");
+    if (!overlay || overlay.querySelector("iframe") || !window.google?.accounts?.id) {
+        return;
+    }
+
+    google.accounts.id.renderButton(overlay, {
+        theme: "outline",
+        size: "large",
+        type: "standard",
+        text: "signin_with",
+        width: Math.max(200, Math.min(240, Math.floor(overlay.clientWidth || 240))),
+    });
+    demoteGoogleIframes();
+}
+
+function demoteGoogleIframes() {
+    document.querySelectorAll('iframe[src*="accounts.google.com"], iframe[src*="gsi"]').forEach((iframe) => {
+        iframe.tabIndex = -1;
+        iframe.setAttribute("aria-hidden", "true");
+    });
+}
+
+function consumeGoogleRedirectResult() {
+    const hashParams = new URLSearchParams(window.location.hash.slice(1));
+    const queryParams = new URLSearchParams(window.location.search);
+    const error = queryParams.get("error") || hashParams.get("error");
+    const idToken = hashParams.get("id_token");
+    const state = hashParams.get("state") || queryParams.get("state");
+
+    if (!error && !idToken) {
+        return false;
+    }
+
+    if (window.opener && !window.opener.closed) {
+        window.opener.postMessage({ type: "layho-google-auth", idToken, state, error }, window.location.origin);
+        window.close();
+        return true;
+    }
+
+    clearOAuthParamsFromUrl();
+    return completeGoogleAuthResult({ idToken, state, error });
 }
 
 function checkSignedIn() {
@@ -264,27 +356,25 @@ function initGoogleSignIn() {
         return;
     }
 
-    if (needsRedirectSignIn()) {
-        renderRedirectSignInButton();
-        return;
-    }
-
     if (!window.google?.accounts?.id) {
-        console.error("Google Identity Services failed to load.");
         return;
     }
 
     google.accounts.id.initialize({
         client_id: googleClientId,
         callback: handleCredentialResponse,
+        ux_mode: "popup",
+        auto_select: false,
         use_fedcm_for_button: false,
     });
-    const introTextContainer = document.getElementById("introTextContainer");
-    const buttonWidth = Math.max(200, Math.min(240, Math.floor(introTextContainer.clientWidth || 240)));
-    google.accounts.id.renderButton(
-        document.getElementById("signInButton"),
-        { theme: "outline", size: "large", type: "standard", text: "signin_with", width: buttonWidth }
-    );
+    if (!needsRedirectSignIn()) {
+        renderGisOverlayButton();
+    }
+    demoteGoogleIframes();
+    new MutationObserver(demoteGoogleIframes).observe(document.documentElement, {
+        childList: true,
+        subtree: true,
+    });
 }
 
 whenViewsReady(function () {
@@ -313,9 +403,12 @@ whenViewsReady(function () {
         document.getElementById("speechStatus").textContent = "Translation view.";
     });
 
-    if (needsRedirectSignIn()) {
-        renderRedirectSignInButton();
-    }
-
+    document.getElementById("signInButton").addEventListener("click", startGoogleSignIn);
+    window.addEventListener("message", (event) => {
+        if (event.origin !== window.location.origin || event.data?.type !== "layho-google-auth") {
+            return;
+        }
+        completeGoogleAuthResult(event.data);
+    });
     checkSignedIn();
 });
