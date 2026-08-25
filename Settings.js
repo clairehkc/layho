@@ -16,9 +16,28 @@ function getSettingsModal() {
     return document.getElementById("settingsModal");
 }
 
+const settingsHash = "settings";
+
+function isSettingsRoute() {
+    return window.location.hash.replace(/^#/, "") === settingsHash;
+}
+
+function setSettingsRoute(open) {
+    if (open) {
+        if (!isSettingsRoute()) {
+            history.pushState({ layho: "settings" }, "", `#${settingsHash}`);
+        }
+        return;
+    }
+
+    if (isSettingsRoute()) {
+        history.replaceState(null, "", `${window.location.pathname}${window.location.search}`);
+    }
+}
+
 function getSettingsFocusableElements() {
     return Array.from(getSettingsModal().querySelectorAll(
-        "button:not([disabled]), select:not([disabled]), input:not([disabled])"
+        "button:not([disabled]), select:not([disabled]), input:not([disabled]), a[href]"
     ));
 }
 
@@ -144,16 +163,20 @@ function updateSettingsScrollHint() {
 
 function showSettings(trigger = document.activeElement) {
     const settingsModal = getSettingsModal();
-    settingsTrigger = trigger;
-    setBackgroundInert(true);
-    settingsModal.style.display = "flex";
-    settingsModal.setAttribute("aria-hidden", "false");
-    snapshotSettingsValues();
-    getSettingsContainer().scrollTop = 0;
-    getSettingsFocusableElements()[0].focus();
-    requestAnimationFrame(() => {
-        requestAnimationFrame(updateSettingsScrollHint);
-    });
+    const alreadyOpen = settingsModal.style.display === "flex";
+    if (!alreadyOpen) {
+        settingsTrigger = trigger;
+        setBackgroundInert(true);
+        settingsModal.style.display = "flex";
+        settingsModal.setAttribute("aria-hidden", "false");
+        snapshotSettingsValues();
+        getSettingsContainer().scrollTop = 0;
+        getSettingsFocusableElements()[0].focus();
+        requestAnimationFrame(() => {
+            requestAnimationFrame(updateSettingsScrollHint);
+        });
+    }
+    setSettingsRoute(true);
 }
 
 function hideSettings(shouldRestoreFocus = true) {
@@ -163,6 +186,7 @@ function hideSettings(shouldRestoreFocus = true) {
     settingsModal.setAttribute("aria-hidden", "true");
     settingsModal.classList.remove("is-overflowing", "can-scroll-down", "can-scroll-up");
     setBackgroundInert(false);
+    setSettingsRoute(false);
 
     if (wasOpen && shouldRestoreFocus && settingsTrigger?.isConnected && !settingsTrigger.hidden) {
         settingsTrigger.focus();
@@ -287,6 +311,20 @@ whenViewsReady(function () {
     }
     if (typeof ResizeObserver === "function") {
         new ResizeObserver(updateSettingsScrollHint).observe(settingsContainer);
+    }
+
+    window.addEventListener("hashchange", function () {
+        if (isSettingsRoute()) {
+            showSettings(document.getElementById("settingsButton"));
+            return;
+        }
+        if (getSettingsModal().style.display === "flex") {
+            closeSettings();
+        }
+    });
+
+    if (isSettingsRoute()) {
+        showSettings(document.getElementById("settingsButton"));
     }
 
     document.addEventListener("keydown", (event) => {

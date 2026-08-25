@@ -321,12 +321,9 @@ function checkSignedIn() {
 
 function setSignedInAppButtons(isSignedIn) {
     const startAppButton = document.getElementById("startAppButton");
-    const settingsButton = document.getElementById("settingsButton");
 
     startAppButton.disabled = !isSignedIn;
-    settingsButton.disabled = !isSignedIn;
     startAppButton.querySelector(".buttonLabel").textContent = isSignedIn ? "Start" : "Sign in to start";
-    settingsButton.querySelector(".buttonLabel").textContent = isSignedIn ? "Settings" : "Sign in for settings";
 }
 
 function onSignIn(name) {
@@ -392,8 +389,7 @@ whenViewsReady(function () {
 
     const settingsButton = document.getElementById("settingsButton");
     settingsButton.addEventListener("click", function () {
-        if (settingsButton.disabled) return;
-        showSettings();
+        showSettings(settingsButton);
     });
 
     const startAppButton = document.getElementById("startAppButton");

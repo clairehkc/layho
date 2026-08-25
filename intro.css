@@ -39,9 +39,18 @@
 
 #helloText {
 	font-size: 8em;
-	padding: 6vh 0 6vh 0;
-	padding: 6dvh 0;
+	padding: 6vh 0 2vh 0;
+	padding: 6dvh 0 2dvh;
 	max-width: 100%;
+}
+
+#introTagline {
+	font-size: 1.4em;
+	padding: 0 0 4vh;
+	padding: 0 0 4dvh;
+	margin: 0;
+	text-align: center;
+	color: var(--primary-link-color);
 }
 
 #signInOutContainer {

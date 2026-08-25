@@ -1,0 +1,88 @@
+html,
+body {
+	height: auto;
+	min-height: 100%;
+	min-height: 100dvh;
+	overflow: auto;
+	font-family: "Times New Roman", Times, serif;
+}
+
+#privacyContainer {
+	width: 100%;
+	min-height: 100%;
+	min-height: 100dvh;
+	display: flex;
+	justify-content: center;
+	padding: 2.5rem 1.25rem;
+	padding-top: max(2.5rem, env(safe-area-inset-top));
+	padding-bottom: max(2.5rem, env(safe-area-inset-bottom));
+	padding-left: max(1.25rem, env(safe-area-inset-left));
+	padding-right: max(1.25rem, env(safe-area-inset-right));
+}
+
+#privacyContent {
+	width: min(40rem, 100%);
+	color: var(--primary-fg-color);
+	line-height: 1.45;
+}
+
+#privacyContent h1 {
+	font-size: 2.4em;
+	font-weight: normal;
+	margin: 0 0 0.4em;
+}
+
+.privacyLead {
+	font-size: 1.2em;
+	margin: 0 0 0.75em;
+}
+
+.privacyMeta {
+	margin: 0 0 2em;
+	color: var(--primary-link-color);
+}
+
+#privacyContent h2 {
+	font-size: 1.4em;
+	font-weight: normal;
+	margin: 1.75em 0 0.6em;
+}
+
+#privacyContent h3 {
+	font-size: 1.15em;
+	font-weight: normal;
+	margin: 1.1em 0 0.4em;
+}
+
+#privacyContent p,
+#privacyContent li {
+	font-size: 1.05em;
+	margin: 0 0 0.85em;
+}
+
+#privacyContent ul {
+	margin: 0 0 0.85em;
+	padding-left: 1.25em;
+}
+
+#privacyContent li {
+	margin-bottom: 0.4em;
+}
+
+#privacyContent a {
+	color: var(--primary-link-color);
+}
+
+#privacyContent a:hover {
+	color: var(--button-hover-color);
+}
+
+#privacyContent a:focus-visible {
+	outline: 2px solid var(--secondary-link-color);
+	outline-offset: 2px;
+}
+
+#privacyContent code {
+	font-family: ui-monospace, "Cascadia Code", "SFMono-Regular", Menlo, Monaco, Consolas, monospace;
+	font-size: 0.9em;
+}

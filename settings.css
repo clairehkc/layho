@@ -77,6 +77,28 @@
 	margin-top: 1dvh;
 }
 
+.settingsPrivacyLink {
+	display: block;
+	width: 100%;
+	color: var(--primary-link-color);
+	font-size: 1.4em;
+	text-decoration: underline;
+	text-underline-offset: 3px;
+}
+
+.settingsPrivacyLink + .settingsPrivacyLink {
+	margin-top: 0.75em;
+}
+
+.settingsPrivacyLink:hover {
+	color: var(--button-hover-color);
+}
+
+.settingsPrivacyLink:focus-visible {
+	outline: 2px solid var(--secondary-link-color);
+	outline-offset: 2px;
+}
+
 .setting {
 	display: flex;
 	flex-wrap: wrap;
