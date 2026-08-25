@@ -28,12 +28,6 @@
 	initial-value: #4d7aff;
 }
 
-@property --settings-hover-color {
-	syntax: "<color>";
-	inherits: false;
-	initial-value: #0033cc;
-}
-
 @property --disabled-color {
 	syntax: "<color>";
 	inherits: false;
@@ -275,12 +269,7 @@ button[hidden] {
 	position: absolute;
 	top: max(16px, env(safe-area-inset-top));
 	left: max(16px, env(safe-area-inset-left));
-	color: var(--primary-bg-color);
 	font-size: 1.2em;
-}
-
-button.settingsCloseButton:hover:not(:disabled) {
-	color: var(--settings-hover-color);
 }
 
 .visuallyHidden {
