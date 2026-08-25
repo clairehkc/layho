@@ -142,6 +142,11 @@ whenViewsReady(function () {
         const isEditableTarget = event.target.closest("input, select, textarea, [contenteditable='true']");
         const isTranslationViewOpen = document.getElementById("translationContainer").style.display === "flex";
         const isSettingsOpen = document.getElementById("settingsModal").style.display === "flex";
+        if (event.key === "Escape" && isTranslationViewOpen && !event.defaultPrevented) {
+            event.preventDefault();
+            homeButton.click();
+            return;
+        }
         if (
             event.key.toLowerCase() === "s"
             && !event.ctrlKey
