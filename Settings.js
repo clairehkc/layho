@@ -120,6 +120,28 @@ function didSettingsChange() {
     return didChange;
 }
 
+function getSettingsContainer() {
+    return document.getElementById("settingsContainer");
+}
+
+function updateSettingsScrollHint() {
+    const settingsModal = getSettingsModal();
+    const container = getSettingsContainer();
+    if (!container || settingsModal.style.display !== "flex") {
+        settingsModal.classList.remove("is-overflowing", "can-scroll-down", "can-scroll-up");
+        return;
+    }
+
+    const maxScroll = container.scrollHeight - container.clientHeight;
+    const canScroll = maxScroll > 1;
+    const atTop = container.scrollTop <= 1;
+    const atBottom = container.scrollTop >= maxScroll - 1;
+
+    settingsModal.classList.toggle("is-overflowing", canScroll);
+    settingsModal.classList.toggle("can-scroll-down", canScroll && !atBottom);
+    settingsModal.classList.toggle("can-scroll-up", canScroll && !atTop);
+}
+
 function showSettings(trigger = document.activeElement) {
     const settingsModal = getSettingsModal();
     settingsTrigger = trigger;
@@ -127,7 +149,11 @@ function showSettings(trigger = document.activeElement) {
     settingsModal.style.display = "flex";
     settingsModal.setAttribute("aria-hidden", "false");
     snapshotSettingsValues();
+    getSettingsContainer().scrollTop = 0;
     getSettingsFocusableElements()[0].focus();
+    requestAnimationFrame(() => {
+        requestAnimationFrame(updateSettingsScrollHint);
+    });
 }
 
 function hideSettings(shouldRestoreFocus = true) {
@@ -135,6 +161,7 @@ function hideSettings(shouldRestoreFocus = true) {
     const wasOpen = settingsModal.style.display === "flex";
     settingsModal.style.display = 'none';
     settingsModal.setAttribute("aria-hidden", "true");
+    settingsModal.classList.remove("is-overflowing", "can-scroll-down", "can-scroll-up");
     setBackgroundInert(false);
 
     if (wasOpen && shouldRestoreFocus && settingsTrigger?.isConnected && !settingsTrigger.hidden) {
@@ -251,6 +278,16 @@ whenViewsReady(function () {
 
     const settingsCloseButton = document.getElementById("settingsCloseButton");
     settingsCloseButton.addEventListener("click", closeSettings);
+
+    const settingsContainer = getSettingsContainer();
+    settingsContainer.addEventListener("scroll", updateSettingsScrollHint, { passive: true });
+    window.addEventListener("resize", updateSettingsScrollHint);
+    if (window.visualViewport) {
+        window.visualViewport.addEventListener("resize", updateSettingsScrollHint);
+    }
+    if (typeof ResizeObserver === "function") {
+        new ResizeObserver(updateSettingsScrollHint).observe(settingsContainer);
+    }
 
     document.addEventListener("keydown", (event) => {
         const settingsModal = getSettingsModal();
