@@ -1,6 +1,6 @@
 <html lang="en">
 <head>
-    <title>Live</title>
+    <title>Layho</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <link href="style.css" rel="stylesheet" type="text/css">
@@ -11,9 +11,9 @@
 </head>
 <body>
 	<div id="contentContainer">
-		<div id="introContainer">
+		<div id="introContainer" role="main">
 			<div id="introTextContainer">
-				<div class="introText" id="helloText">Layho</div>
+				<div class="introText" id="helloText" role="heading" aria-level="1">Layho</div>
 				<div class="introText" id="signInOutContainer">
 					<div id="nameText"></div>
 					<div id="signInButtonHost" hidden>
@@ -29,7 +29,7 @@
 						<div id="googleGisButton"></div>
 					</div>
 				</div>
-				<div class="introText" id="introButtonContainer">	
+				<div class="introText" id="introButtonContainer" role="navigation" aria-label="Home">
 					<div id="signUpOutButtonContainer">
 						<button id="signUpButton" class="iconButton"><span class="icon signUpIcon" aria-hidden="true"></span><span class="buttonLabel">Sign up</span></button>
 						<button id="signOutButton" class="iconButton" hidden><span class="icon signOutIcon" aria-hidden="true"></span><span class="buttonLabel">Sign out</span></button>
@@ -40,6 +40,7 @@
 			</div>
 		</div>
 		<div id="speechStatus" class="visuallyHidden" role="status" aria-live="polite" aria-atomic="true"></div>
+		<div id="exclusiveModeHint" class="visuallyHidden">Voice output and conversation mode cannot be used at the same time. Turning one on turns the other off.</div>
 		<div id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
 	</div>
 	<!-- Speech SDK REFERENCE -->

@@ -18,20 +18,20 @@
 					<div class="setting">
 						<h2 class="settingTitle">Output</h2>
 						<div class="settingOption">
-							<label for="voiceOutputInput" class="settingOptionLabel">Voice</label>
+							<label id="voiceOutputLabel" for="voiceOutputInput" class="settingOptionLabel">Voice</label>
 							<label class="switch">
-								<input id="voiceOutputInput" type="checkbox">
-								<span class="slider"></span>
+								<input id="voiceOutputInput" type="checkbox" aria-labelledby="voiceOutputLabel" aria-describedby="exclusiveModeHint">
+								<span class="slider" aria-hidden="true"></span>
 							</label>
 						</div>
 					</div>
 					<div class="setting">
 						<h2 class="settingTitle">Mode</h2>
 						<div class="settingOption">
-							<label for="conversationModeInput" class="settingOptionLabel">Conversation</label>
+							<label id="conversationModeLabel" for="conversationModeInput" class="settingOptionLabel">Conversation</label>
 							<label class="switch">
-								<input id="conversationModeInput" type="checkbox">
-								<span class="slider"></span>
+								<input id="conversationModeInput" type="checkbox" aria-labelledby="conversationModeLabel" aria-describedby="exclusiveModeHint">
+								<span class="slider" aria-hidden="true"></span>
 							</label>
 						</div>
 					</div>

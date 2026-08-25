@@ -334,6 +334,7 @@ function onSignIn(name) {
     setSignedInAppButtons(true);
     hideSignInControls();
     updateAuthActionButton(true);
+    document.getElementById("speechStatus").textContent = `Signed in as ${name}.`;
 }
 
 function onSignOut() {
@@ -346,6 +347,7 @@ function onSignOut() {
     showSignInControls();
     document.getElementById("nameText").textContent = "";
     setSignedInAppButtons(false);
+    document.getElementById("speechStatus").textContent = "Signed out.";
 }
 
 function initGoogleSignIn() {

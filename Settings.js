@@ -124,7 +124,7 @@ function showSettings(trigger = document.activeElement) {
     const settingsModal = getSettingsModal();
     settingsTrigger = trigger;
     setBackgroundInert(true);
-    settingsModal.style.display = 'flex';
+    settingsModal.style.display = "flex";
     settingsModal.setAttribute("aria-hidden", "false");
     snapshotSettingsValues();
     getSettingsFocusableElements()[0].focus();
@@ -132,7 +132,7 @@ function showSettings(trigger = document.activeElement) {
 
 function hideSettings(shouldRestoreFocus = true) {
     const settingsModal = getSettingsModal();
-    const wasOpen = settingsModal.style.display === 'flex';
+    const wasOpen = settingsModal.style.display === "flex";
     settingsModal.style.display = 'none';
     settingsModal.setAttribute("aria-hidden", "true");
     setBackgroundInert(false);
@@ -145,7 +145,7 @@ function hideSettings(shouldRestoreFocus = true) {
 }
 
 function closeSettings(shouldRestoreFocus = true) {
-    const wasOpen = getSettingsModal().style.display === 'flex';
+    const wasOpen = getSettingsModal().style.display === "flex";
     if (wasOpen) {
         restoreSettingsValues();
     }
@@ -200,17 +200,19 @@ whenViewsReady(function () {
     conversationModeInput = document.getElementById("conversationModeInput");
     populateLanguageOptions();
 
-    voiceOutputInput.addEventListener("change", (event) =>  {
-        if (voiceOutputInput.checked) {
-            // disable conversation mode when voice output is checked
+    voiceOutputInput.addEventListener("change", () => {
+        if (voiceOutputInput.checked && conversationModeInput.checked) {
             conversationModeInput.checked = false;
+            document.getElementById("speechStatus").textContent =
+                "Voice output on. Conversation mode turned off.";
         }
     });
-    
-    conversationModeInput.addEventListener("change", (event) =>  {
-        if (conversationModeInput.checked) {
-            // disable voice output when conversation mode is checked
+
+    conversationModeInput.addEventListener("change", () => {
+        if (conversationModeInput.checked && voiceOutputInput.checked) {
             voiceOutputInput.checked = false;
+            document.getElementById("speechStatus").textContent =
+                "Conversation mode on. Voice output turned off.";
         }
     });
 

@@ -14,7 +14,9 @@ function getSignUpFocusableElements() {
 }
 
 function setSignUpSubmitting(isSubmitting) {
+    const form = document.getElementById("signUpForm");
     const submitButton = document.getElementById("signUpSubmitButton");
+    form.setAttribute("aria-busy", isSubmitting ? "true" : "false");
     submitButton.disabled = isSubmitting;
     submitButton.querySelector(".buttonLabel").textContent = isSubmitting ? "Submitting" : "Submit";
 }
