@@ -2,6 +2,8 @@
 
 Live speech translation app. Sign in with Google, configure languages, and start real-time translation.
 
+**Live:** [https://layho.app](https://layho.app)
+
 ## Prerequisites
 
 - A modern browser (Chrome recommended)
