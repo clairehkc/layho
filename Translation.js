@@ -114,15 +114,69 @@ function setFullscreenButtonsState(isFullscreen) {
     }
 }
 
+function setChromeButtonsState(hidden) {
+    const hideButton = document.getElementById("hideChromeButton");
+    const showButton = document.getElementById("showChromeButton");
+    if (!hideButton || !showButton) return;
+    hideButton.hidden = hidden;
+    showButton.hidden = !hidden;
+    const nextButton = hidden ? showButton : hideButton;
+    if (document.activeElement === hideButton || document.activeElement === showButton) {
+        nextButton.focus();
+    }
+}
+
+function isTranslationChromeHidden() {
+    return document.getElementById("translationContainer")?.classList.contains("translation-chrome-hidden");
+}
+
+function setTranslationChromeHidden(hidden) {
+    const translationContainer = document.getElementById("translationContainer");
+    if (!translationContainer) return;
+    translationContainer.classList.toggle("translation-chrome-hidden", hidden);
+    setChromeButtonsState(hidden);
+    if (hidden) {
+        const active = document.activeElement;
+        const translationDisplay = document.getElementById("translationDisplayContainer");
+        const showButton = document.getElementById("showChromeButton");
+        if (
+            active
+            && translationContainer.contains(active)
+            && active !== showButton
+            && !translationDisplay.contains(active)
+        ) {
+            showButton?.focus();
+        }
+    }
+    scheduleFitTranslationText();
+}
+
+function toggleTranslationChrome() {
+    const hideChrome = !isTranslationChromeHidden();
+    setTranslationChromeHidden(hideChrome);
+    document.getElementById("speechStatus").textContent = hideChrome
+        ? "Controls hidden."
+        : "Controls shown.";
+}
+
+let lastBrowserFullscreen = false;
+
 function syncTranslationFullscreenUi() {
     const isFullscreen = isBrowserFullscreen();
+    const enteredFullscreen = isFullscreen && !lastBrowserFullscreen;
+    const exitedFullscreen = !isFullscreen && lastBrowserFullscreen;
+    lastBrowserFullscreen = isFullscreen;
     setFullscreenButtonsState(isFullscreen);
+    if (exitedFullscreen) {
+        setTranslationChromeHidden(false);
+    } else if (enteredFullscreen && isListening) {
+        setTranslationChromeHidden(true);
+    }
     const translationContainer = document.getElementById("translationContainer");
     if (!translationContainer || translationContainer.style.display !== "flex") return;
     document.getElementById("speechStatus").textContent = isFullscreen
         ? "Fullscreen."
         : "Exited fullscreen.";
-    scheduleFitTranslationText();
 }
 
 function getFullscreenMethod(object, methodNames) {
@@ -175,10 +229,15 @@ function exitTranslationFullscreen() {
 
 function toggleTranslationFullscreen() {
     if (isBrowserFullscreen()) {
+        setTranslationChromeHidden(false);
         return exitTranslationFullscreen();
+    }
+    if (isListening) {
+        setTranslationChromeHidden(true);
     }
     return requestAppFullscreen().catch((error) => {
         console.warn("Unable to enter browser fullscreen", error);
+        setTranslationChromeHidden(false);
     });
 }
 
@@ -192,8 +251,37 @@ whenViewsReady(function () {
     const translationDisplayContainer = document.getElementById("translationDisplayContainer");
     new ResizeObserver(scheduleFitTranslationText).observe(translationDisplayContainer);
     window.addEventListener("resize", scheduleFitTranslationText);
+    lastBrowserFullscreen = isBrowserFullscreen();
     ["fullscreenchange", "webkitfullscreenchange"].forEach((eventName) => {
         document.addEventListener(eventName, syncTranslationFullscreenUi);
+    });
+
+    const chromeToggleMovePx = 8;
+    let chromeTogglePointer = null;
+    let chromeToggleWasDrag = false;
+    translationDisplayContainer.addEventListener("pointerdown", function (event) {
+        chromeTogglePointer = { id: event.pointerId, x: event.clientX, y: event.clientY };
+        chromeToggleWasDrag = false;
+    });
+    translationDisplayContainer.addEventListener("pointermove", function (event) {
+        if (!chromeTogglePointer || event.pointerId !== chromeTogglePointer.id) return;
+        const dx = event.clientX - chromeTogglePointer.x;
+        const dy = event.clientY - chromeTogglePointer.y;
+        if ((dx * dx) + (dy * dy) > chromeToggleMovePx * chromeToggleMovePx) {
+            chromeToggleWasDrag = true;
+        }
+    });
+    const clearChromeTogglePointer = function (event) {
+        if (chromeTogglePointer && event.pointerId === chromeTogglePointer.id) {
+            chromeTogglePointer = null;
+        }
+    };
+    translationDisplayContainer.addEventListener("pointerup", clearChromeTogglePointer);
+    translationDisplayContainer.addEventListener("pointercancel", clearChromeTogglePointer);
+    translationDisplayContainer.addEventListener("click", function () {
+        if (chromeToggleWasDrag) return;
+        if (!isTranslationChromeHidden() && !isBrowserFullscreen()) return;
+        toggleTranslationChrome();
     });
 
     const switchLanguageButton = document.getElementById("switchLanguageButton");
@@ -225,6 +313,16 @@ whenViewsReady(function () {
         toggleTranslationFullscreen();
     });
     setFullscreenButtonsState(isBrowserFullscreen());
+
+    const hideChromeButton = document.getElementById("hideChromeButton");
+    const showChromeButton = document.getElementById("showChromeButton");
+    hideChromeButton.addEventListener("click", function () {
+        toggleTranslationChrome();
+    });
+    showChromeButton.addEventListener("click", function () {
+        toggleTranslationChrome();
+    });
+    setChromeButtonsState(isTranslationChromeHidden());
 
     const translateViewSettingsButton = document.getElementById("translateViewSettingsButton");
     translateViewSettingsButton.addEventListener("click", function () {

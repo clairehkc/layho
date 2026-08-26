@@ -1,6 +1,7 @@
 #translationContainer {
 	display: flex;
 	flex-direction: column;
+	position: relative;
 	width: 100%;
 	height: 100%;
 }
@@ -46,6 +47,23 @@
 #fullscreenButtonContainer > button {
 	grid-area: 1 / 1;
 	width: 100%;
+}
+
+#chromeButtonContainer {
+	display: grid;
+	width: auto;
+}
+
+#chromeButtonContainer > button {
+	grid-area: 1 / 1;
+	width: 100%;
+}
+
+#chromeButtonContainer .iconButton:hover:not(:disabled) .buttonLabel,
+#chromeButtonContainer .iconButton:focus-visible .buttonLabel {
+	left: auto;
+	right: 0;
+	transform: none;
 }
 
 #controlsDivider {
@@ -94,6 +112,38 @@
 	align-items: center;
 	justify-content: center;
 	overflow: hidden;
+}
+
+:fullscreen #translationDisplayContainer,
+:-webkit-full-screen #translationDisplayContainer,
+#translationContainer.translation-chrome-hidden #translationDisplayContainer {
+	cursor: pointer;
+	touch-action: manipulation;
+}
+
+#translationContainer.translation-chrome-hidden #translationDisplayContainer {
+	user-select: none;
+	-webkit-user-select: none;
+}
+
+#translationContainer.translation-chrome-hidden #languageSelectionDisplay,
+#translationContainer.translation-chrome-hidden #controlsDivider,
+#translationContainer.translation-chrome-hidden #homeButton,
+#translationContainer.translation-chrome-hidden #startStopButtonContainer,
+#translationContainer.translation-chrome-hidden #translateViewSettingsButton,
+#translationContainer.translation-chrome-hidden #fullscreenButtonContainer {
+	display: none;
+}
+
+#translationContainer.translation-chrome-hidden #controlsContainer {
+	position: absolute;
+	right: 0;
+	bottom: 0;
+	z-index: 2;
+	width: auto;
+	display: flex;
+	justify-content: flex-end;
+	background-color: transparent;
 }
 
 #resultsContainer {

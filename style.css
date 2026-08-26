@@ -315,6 +315,18 @@ button[hidden] {
 	background-color: currentColor;
 }
 
+.chromeHideIcon {
+	mask: url(icons/chrome-hide.svg) no-repeat center / contain;
+	-webkit-mask: url(icons/chrome-hide.svg) no-repeat center / contain;
+	background-color: currentColor;
+}
+
+.chromeShowIcon {
+	mask: url(icons/chrome-show.svg) no-repeat center / contain;
+	-webkit-mask: url(icons/chrome-show.svg) no-repeat center / contain;
+	background-color: currentColor;
+}
+
 .settingsCloseButton {
 	position: absolute;
 	top: max(16px, env(safe-area-inset-top));
