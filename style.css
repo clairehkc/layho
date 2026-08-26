@@ -303,6 +303,18 @@ button[hidden] {
 	background-color: currentColor;
 }
 
+.fullscreenIcon {
+	mask: url(icons/fullscreen.svg) no-repeat center / contain;
+	-webkit-mask: url(icons/fullscreen.svg) no-repeat center / contain;
+	background-color: currentColor;
+}
+
+.fullscreenExitIcon {
+	mask: url(icons/fullscreen-exit.svg) no-repeat center / contain;
+	-webkit-mask: url(icons/fullscreen-exit.svg) no-repeat center / contain;
+	background-color: currentColor;
+}
+
 .settingsCloseButton {
 	position: absolute;
 	top: max(16px, env(safe-area-inset-top));

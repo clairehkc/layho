@@ -102,10 +102,24 @@ function isBrowserFullscreen() {
     return Boolean(getFullscreenElement());
 }
 
+function setFullscreenButtonsState(isFullscreen) {
+    const enterButton = document.getElementById("enterFullscreenButton");
+    const exitButton = document.getElementById("exitFullscreenButton");
+    if (!enterButton || !exitButton) return;
+    enterButton.hidden = isFullscreen;
+    exitButton.hidden = !isFullscreen;
+    const nextButton = isFullscreen ? exitButton : enterButton;
+    if (document.activeElement === enterButton || document.activeElement === exitButton) {
+        nextButton.focus();
+    }
+}
+
 function syncTranslationFullscreenUi() {
+    const isFullscreen = isBrowserFullscreen();
+    setFullscreenButtonsState(isFullscreen);
     const translationContainer = document.getElementById("translationContainer");
     if (!translationContainer || translationContainer.style.display !== "flex") return;
-    document.getElementById("speechStatus").textContent = isBrowserFullscreen()
+    document.getElementById("speechStatus").textContent = isFullscreen
         ? "Fullscreen."
         : "Exited fullscreen.";
     scheduleFitTranslationText();
@@ -181,10 +195,6 @@ whenViewsReady(function () {
     ["fullscreenchange", "webkitfullscreenchange"].forEach((eventName) => {
         document.addEventListener(eventName, syncTranslationFullscreenUi);
     });
-    translationDisplayContainer.addEventListener("click", function () {
-        if (window.getSelection()?.toString()) return;
-        toggleTranslationFullscreen();
-    });
 
     const switchLanguageButton = document.getElementById("switchLanguageButton");
 
@@ -205,6 +215,16 @@ whenViewsReady(function () {
     Initialize(async function (speechSdk) {
         SpeechSDK = speechSdk;
     });
+
+    const enterFullscreenButton = document.getElementById("enterFullscreenButton");
+    const exitFullscreenButton = document.getElementById("exitFullscreenButton");
+    enterFullscreenButton.addEventListener("click", function () {
+        toggleTranslationFullscreen();
+    });
+    exitFullscreenButton.addEventListener("click", function () {
+        toggleTranslationFullscreen();
+    });
+    setFullscreenButtonsState(isBrowserFullscreen());
 
     const translateViewSettingsButton = document.getElementById("translateViewSettingsButton");
     translateViewSettingsButton.addEventListener("click", function () {
