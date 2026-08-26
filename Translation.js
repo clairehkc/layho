@@ -329,6 +329,17 @@ whenViewsReady(function () {
         showSettings();
     });
 
+    const speechRecognitionLanguageDisplay = document.getElementById("speechRecognitionLanguageDisplay");
+    const targetLanguageDisplay = document.getElementById("targetLanguageDisplay");
+    speechRecognitionLanguageDisplay.addEventListener("click", function () {
+        showSettings(speechRecognitionLanguageDisplay);
+        speechRecognitionLanguageOptions.focus();
+    });
+    targetLanguageDisplay.addEventListener("click", function () {
+        showSettings(targetLanguageDisplay);
+        targetLanguageOptions.focus();
+    });
+
     const homeButton = document.getElementById("homeButton");
     homeButton.addEventListener("click", function () {
         closeSettings(false);
@@ -587,10 +598,14 @@ function doContinuousTranslation(newSpeechRecognitionLanguage = undefined, newTa
 function updateLanguageDisplays(fromLocale, toLocale) {
     const fromOption = speechRecognitionLanguageOptions.querySelector(`option[value="${fromLocale}"]`);
     const toOption = targetLanguageOptions.querySelector(`option[value="${toLocale}"]`);
-    document.getElementById("speechRecognitionLanguageDisplay").textContent =
-        fromOption?.dataset.displayName || fromLocale;
-    document.getElementById("targetLanguageDisplay").textContent =
-        toOption?.dataset.displayName || toLocale;
+    setLanguageDisplayName(
+        document.getElementById("speechRecognitionLanguageDisplay"),
+        fromOption?.dataset.displayName || fromLocale
+    );
+    setLanguageDisplayName(
+        document.getElementById("targetLanguageDisplay"),
+        toOption?.dataset.displayName || toLocale
+    );
 }
 
 function languagesMatch(detectedLanguage, recognizerLocale) {

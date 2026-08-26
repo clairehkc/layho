@@ -106,14 +106,24 @@ function updateSavedSettingsValues() {
     persistSettings();
 }
 
+function setLanguageDisplayName(element, text) {
+    if (!element) return;
+    const name = element.querySelector(".languageDisplayName");
+    (name || element).textContent = text;
+}
+
 function syncLanguageDisplaysFromSettings() {
     const fromOption = speechRecognitionLanguageOptions.selectedOptions[0];
     const toOption = targetLanguageOptions.selectedOptions[0];
     if (!fromOption || !toOption) return;
-    const fromDisplay = document.getElementById("speechRecognitionLanguageDisplay");
-    const toDisplay = document.getElementById("targetLanguageDisplay");
-    if (fromDisplay) fromDisplay.textContent = fromOption.dataset.displayName;
-    if (toDisplay) toDisplay.textContent = toOption.dataset.displayName;
+    setLanguageDisplayName(
+        document.getElementById("speechRecognitionLanguageDisplay"),
+        fromOption.dataset.displayName
+    );
+    setLanguageDisplayName(
+        document.getElementById("targetLanguageDisplay"),
+        toOption.dataset.displayName
+    );
 }
 
 function restoreSettingsValues() {
