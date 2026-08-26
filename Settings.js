@@ -143,11 +143,23 @@ function getSettingsContainer() {
     return document.getElementById("settingsContainer");
 }
 
+function getSettingsScrollHintButton() {
+    return document.getElementById("settingsScrollHintButton");
+}
+
+function prefersReducedMotion() {
+    return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+}
+
 function updateSettingsScrollHint() {
     const settingsModal = getSettingsModal();
     const container = getSettingsContainer();
+    const hintButton = getSettingsScrollHintButton();
     if (!container || settingsModal.style.display !== "flex") {
         settingsModal.classList.remove("is-overflowing", "can-scroll-down", "can-scroll-up");
+        if (hintButton) {
+            hintButton.disabled = true;
+        }
         return;
     }
 
@@ -155,10 +167,23 @@ function updateSettingsScrollHint() {
     const canScroll = maxScroll > 1;
     const atTop = container.scrollTop <= 1;
     const atBottom = container.scrollTop >= maxScroll - 1;
+    const canScrollDown = canScroll && !atBottom;
 
     settingsModal.classList.toggle("is-overflowing", canScroll);
-    settingsModal.classList.toggle("can-scroll-down", canScroll && !atBottom);
+    settingsModal.classList.toggle("can-scroll-down", canScrollDown);
     settingsModal.classList.toggle("can-scroll-up", canScroll && !atTop);
+    if (hintButton) {
+        hintButton.disabled = !canScrollDown;
+    }
+}
+
+function scrollSettingsDown() {
+    const container = getSettingsContainer();
+    if (!container) return;
+    container.scrollBy({
+        top: Math.max(container.clientHeight * 0.8, 120),
+        behavior: prefersReducedMotion() ? "auto" : "smooth"
+    });
 }
 
 function showSettings(trigger = document.activeElement) {
@@ -185,6 +210,10 @@ function hideSettings(shouldRestoreFocus = true) {
     settingsModal.style.display = 'none';
     settingsModal.setAttribute("aria-hidden", "true");
     settingsModal.classList.remove("is-overflowing", "can-scroll-down", "can-scroll-up");
+    const hintButton = getSettingsScrollHintButton();
+    if (hintButton) {
+        hintButton.disabled = true;
+    }
     setBackgroundInert(false);
     setSettingsRoute(false);
 
@@ -304,6 +333,7 @@ whenViewsReady(function () {
     settingsCloseButton.addEventListener("click", closeSettings);
 
     const settingsContainer = getSettingsContainer();
+    getSettingsScrollHintButton().addEventListener("click", scrollSettingsDown);
     settingsContainer.addEventListener("scroll", updateSettingsScrollHint, { passive: true });
     window.addEventListener("resize", updateSettingsScrollHint);
     if (window.visualViewport) {
