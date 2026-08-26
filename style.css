@@ -40,6 +40,18 @@
 	initial-value: #666;
 }
 
+@property --recording-color {
+	syntax: "<color>";
+	inherits: false;
+	initial-value: #e53935;
+}
+
+@property --recording-hover-color {
+	syntax: "<color>";
+	inherits: false;
+	initial-value: #ff6b63;
+}
+
 *, *::before, *::after {
 	box-sizing: border-box;
 }
