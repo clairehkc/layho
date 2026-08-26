@@ -88,6 +88,20 @@ html.standalone #contentContainer {
 	}
 }
 
+html:fullscreen,
+html:fullscreen body,
+html:fullscreen #contentContainer {
+	height: 100%;
+	height: 100vh;
+}
+
+html:-webkit-full-screen,
+html:-webkit-full-screen body,
+html:-webkit-full-screen #contentContainer {
+	height: 100%;
+	height: 100vh;
+}
+
 button {
 	font-family: "Times New Roman", Times, serif;
 	color: var(--primary-link-color);

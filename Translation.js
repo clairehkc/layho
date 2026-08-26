@@ -90,6 +90,84 @@ function scheduleFitTranslationText() {
     fitTranslationTextFrame = requestAnimationFrame(fitTranslationText);
 }
 
+function getFullscreenElement() {
+    return document.fullscreenElement
+        || document.webkitFullscreenElement
+        || document.mozFullScreenElement
+        || document.msFullscreenElement
+        || null;
+}
+
+function isBrowserFullscreen() {
+    return Boolean(getFullscreenElement());
+}
+
+function syncTranslationFullscreenUi() {
+    const translationContainer = document.getElementById("translationContainer");
+    if (!translationContainer || translationContainer.style.display !== "flex") return;
+    document.getElementById("speechStatus").textContent = isBrowserFullscreen()
+        ? "Fullscreen."
+        : "Exited fullscreen.";
+    scheduleFitTranslationText();
+}
+
+function getFullscreenMethod(object, methodNames) {
+    return methodNames.find((name) => typeof object[name] === "function");
+}
+
+function invokeFullscreenMethod(object, methodName, args = []) {
+    try {
+        const result = object[methodName](...args);
+        return result instanceof Promise ? result : Promise.resolve();
+    } catch (error) {
+        return Promise.reject(error);
+    }
+}
+
+function requestAppFullscreen() {
+    const element = document.documentElement;
+    const methodName = getFullscreenMethod(element, [
+        "requestFullscreen",
+        "webkitRequestFullscreen",
+        "webkitRequestFullScreen",
+        "mozRequestFullScreen",
+        "msRequestFullscreen",
+    ]);
+    if (!methodName) {
+        return Promise.reject(new Error("Fullscreen API not available"));
+    }
+    return invokeFullscreenMethod(element, methodName, [{ navigationUI: "hide" }])
+        .catch(() => invokeFullscreenMethod(element, methodName));
+}
+
+function exitAppFullscreen() {
+    if (!isBrowserFullscreen()) return Promise.resolve();
+    const methodName = getFullscreenMethod(document, [
+        "exitFullscreen",
+        "webkitExitFullscreen",
+        "webkitCancelFullScreen",
+        "mozCancelFullScreen",
+        "msExitFullscreen",
+    ]);
+    if (!methodName) return Promise.resolve();
+    return invokeFullscreenMethod(document, methodName);
+}
+
+function exitTranslationFullscreen() {
+    return exitAppFullscreen().catch((error) => {
+        console.warn("Unable to exit fullscreen", error);
+    });
+}
+
+function toggleTranslationFullscreen() {
+    if (isBrowserFullscreen()) {
+        return exitTranslationFullscreen();
+    }
+    return requestAppFullscreen().catch((error) => {
+        console.warn("Unable to enter browser fullscreen", error);
+    });
+}
+
 whenViewsReady(function () {
     startButton = document.getElementById("startButton");
     stopButton = document.getElementById("stopButton");
@@ -100,6 +178,13 @@ whenViewsReady(function () {
     const translationDisplayContainer = document.getElementById("translationDisplayContainer");
     new ResizeObserver(scheduleFitTranslationText).observe(translationDisplayContainer);
     window.addEventListener("resize", scheduleFitTranslationText);
+    ["fullscreenchange", "webkitfullscreenchange"].forEach((eventName) => {
+        document.addEventListener(eventName, syncTranslationFullscreenUi);
+    });
+    translationDisplayContainer.addEventListener("click", function () {
+        if (window.getSelection()?.toString()) return;
+        toggleTranslationFullscreen();
+    });
 
     const switchLanguageButton = document.getElementById("switchLanguageButton");
 
@@ -132,6 +217,7 @@ whenViewsReady(function () {
         if (isListening) {
             stopContinuousTranslation();
         }
+        exitTranslationFullscreen();
         document.getElementById("translationContainer").style.display = 'none';
         document.getElementById("introContainer").style.display = 'flex';
         document.getElementById("startAppButton").focus();
@@ -143,6 +229,9 @@ whenViewsReady(function () {
         const isTranslationViewOpen = document.getElementById("translationContainer").style.display === "flex";
         const isSettingsOpen = document.getElementById("settingsModal").style.display === "flex";
         if (event.key === "Escape" && isTranslationViewOpen && !event.defaultPrevented) {
+            if (isBrowserFullscreen()) {
+                return;
+            }
             event.preventDefault();
             homeButton.click();
             return;

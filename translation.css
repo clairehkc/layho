@@ -82,6 +82,8 @@
 	align-items: center;
 	justify-content: center;
 	overflow: hidden;
+	touch-action: manipulation;
+	cursor: pointer;
 }
 
 #resultsContainer {
