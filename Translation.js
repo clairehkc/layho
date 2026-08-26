@@ -359,6 +359,12 @@ whenViewsReady(function () {
         const isSettingsOpen = document.getElementById("settingsModal").style.display === "flex";
         if (event.key === "Escape" && isTranslationViewOpen && !event.defaultPrevented) {
             if (isBrowserFullscreen()) {
+                setTranslationChromeHidden(false);
+                return;
+            }
+            if (isTranslationChromeHidden()) {
+                event.preventDefault();
+                toggleTranslationChrome();
                 return;
             }
             event.preventDefault();
