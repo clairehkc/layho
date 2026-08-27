@@ -42,7 +42,7 @@ function getSignInCookie() {
     return getCookie(signInCookieName);
 }
 
-async function fetchApiKey(token) {
+async function fetchApiKey(token, { notifyIfUnauthorized = false } = {}) {
     try {
         const response = await fetch(loginUrl, {
             headers: {
@@ -51,6 +51,10 @@ async function fetchApiKey(token) {
             },
         });
         if (!response.ok) {
+            if (response.status === 403) {
+                handleUnauthorizedSignIn(notifyIfUnauthorized);
+                return;
+            }
             throw new Error(`Response status: ${response.status}`);
         }
 
@@ -60,12 +64,22 @@ async function fetchApiKey(token) {
             onSignIn(json.body.name);
             apiKey = json.body.key;
         } else {
-            showSignInControls();
+            handleUnauthorizedSignIn(notifyIfUnauthorized);
         }
 
         return apiKey;
     } catch (error) {
         console.error(error.message);
+    }
+}
+
+function handleUnauthorizedSignIn(notify = false) {
+    clearSignInCookie();
+    updateAuthActionButton(false);
+    showSignInControls();
+    syncHomeSettingsButton();
+    if (notify && typeof showToast === "function") {
+        showToast("This account isn't authorized. Please sign up.");
     }
 }
 
@@ -91,7 +105,7 @@ function updateAuthActionButton(isSignedIn) {
 function handleCredentialResponse(response) {
     setSignInCookie(response.credential);
     syncHomeSettingsButton();
-    fetchApiKey(response.credential);
+    fetchApiKey(response.credential, { notifyIfUnauthorized: true });
     hideSignInControls();
     updateAuthActionButton(true);
 }
