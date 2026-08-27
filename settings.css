@@ -25,6 +25,39 @@
 	padding-right: max(1rem, env(safe-area-inset-right));
 }
 
+@media (max-width: 480px) and (orientation: portrait) {
+	#settingsContainer {
+		padding: 5.5rem 2.5rem 2rem;
+		padding-top: max(5.5rem, calc(4rem + env(safe-area-inset-top)));
+		padding-bottom: max(2rem, env(safe-area-inset-bottom));
+		padding-left: max(2.5rem, env(safe-area-inset-left));
+		padding-right: max(2.5rem, env(safe-area-inset-right));
+	}
+
+	#settingsHeader {
+		font-size: 2.1em;
+	}
+
+	.settingTitle {
+		font-size: 1.45em;
+	}
+
+	.settingOptionLabel {
+		font-size: 1.25em;
+	}
+
+	.settingOption:has(select) {
+		display: flex;
+		flex-direction: column;
+		align-items: stretch;
+		gap: 0.5em;
+	}
+
+	.settingOption:has(select) select {
+		max-width: none;
+	}
+}
+
 #settingsContainer::-webkit-scrollbar {
 	width: 6px;
 }
@@ -96,6 +129,7 @@
 }
 
 .setting.settingsLegalLinks {
+	display: flex;
 	flex-direction: column;
 	align-items: flex-start;
 	margin-top: 0.5em;
@@ -115,16 +149,18 @@
 }
 
 .setting {
-	display: flex;
-	flex-wrap: wrap;
+	display: grid;
+	grid-template-columns: max-content minmax(0, 1fr);
 	align-items: center;
+	column-gap: 12px;
 	width: 100%;
 	padding: 2vh 0;
 	padding: 2dvh 0;
 }
 
 .settingTitle {
-	width: 100%;
+	grid-column: 1 / -1;
+	width: auto;
 	font-size: 1.6em;
 	font-weight: normal;
 	padding: 1vh 0;
@@ -133,11 +169,10 @@
 }
 
 .settingOption {
-	display: flex;
-	flex-wrap: nowrap;
+	display: grid;
+	grid-template-columns: subgrid;
+	grid-column: 1 / -1;
 	align-items: center;
-	justify-content: space-between;
-	gap: 12px;
 	width: 100%;
 	padding: 1vh 0 1vh 16px;
 	padding: 1dvh 0 1dvh 1rem;
@@ -146,16 +181,15 @@
 .settingOptionLabel {
 	font-size: 1.4em;
 	padding-right: 0;
-	min-width: 0;
-	flex: 1 1 auto;
+	white-space: nowrap;
 }
 
 select {
 	height: 2em;
-	width: 12em;
-	max-width: 100%;
+	width: 100%;
+	max-width: 12em;
 	min-width: 0;
-	flex: 0 1 12em;
+	justify-self: start;
 }
 
 .switch {
@@ -163,6 +197,7 @@ select {
 	display: inline-block;
 	width: 60px;
 	height: 34px;
+	justify-self: end;
 }
 
 .switch input {

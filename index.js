@@ -90,6 +90,7 @@ function updateAuthActionButton(isSignedIn) {
 
 function handleCredentialResponse(response) {
     setSignInCookie(response.credential);
+    syncHomeSettingsButton();
     fetchApiKey(response.credential);
     hideSignInControls();
     updateAuthActionButton(true);
@@ -312,10 +313,26 @@ function checkSignedIn() {
     const savedToken = getSignInCookie();
 
     if (savedToken) {
+        syncHomeSettingsButton();
         fetchApiKey(savedToken);
     } else {
         showSignInControls();
         updateAuthActionButton(false);
+        syncHomeSettingsButton();
+    }
+}
+
+function syncHomeSettingsButton() {
+    const signedIn = Boolean(getSignInCookie());
+    const settingsButton = document.getElementById("settingsButton");
+    if (!settingsButton) {
+        return;
+    }
+
+    settingsButton.disabled = !signedIn;
+    const label = settingsButton.querySelector(".buttonLabel");
+    if (label) {
+        label.textContent = signedIn ? "Settings" : "Sign in for settings";
     }
 }
 
@@ -324,6 +341,7 @@ function setSignedInAppButtons(isSignedIn) {
 
     startAppButton.disabled = !isSignedIn;
     startAppButton.querySelector(".buttonLabel").textContent = isSignedIn ? "Start" : "Sign in to start";
+    syncHomeSettingsButton();
 }
 
 function onSignIn(name) {
@@ -332,6 +350,9 @@ function onSignIn(name) {
     hideSignInControls();
     updateAuthActionButton(true);
     document.getElementById("speechStatus").textContent = `Signed in as ${name}.`;
+    if (isSettingsRoute()) {
+        showSettings(document.getElementById("settingsButton"));
+    }
 }
 
 function onSignOut() {
@@ -344,6 +365,7 @@ function onSignOut() {
     showSignInControls();
     document.getElementById("nameText").textContent = "";
     setSignedInAppButtons(false);
+    closeSettings(false);
     document.getElementById("speechStatus").textContent = "Signed out.";
 }
 
@@ -389,6 +411,7 @@ whenViewsReady(function () {
 
     const settingsButton = document.getElementById("settingsButton");
     settingsButton.addEventListener("click", function () {
+        if (settingsButton.disabled) return;
         showSettings(settingsButton);
     });
 

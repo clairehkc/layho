@@ -41,6 +41,14 @@
 	max-width: 100%;
 }
 
+@media (max-width: 480px) and (orientation: portrait) {
+	#helloText {
+		font-size: min(8em, 26vw);
+		padding: 8vh 0;
+		padding: 8dvh 0;
+	}
+}
+
 #signInOutContainer {
 	position: relative;
 	z-index: 1;

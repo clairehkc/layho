@@ -196,7 +196,17 @@ function scrollSettingsDown() {
     });
 }
 
+function canOpenSettings() {
+    return Boolean(getSignInCookie());
+}
+
 function showSettings(trigger = document.activeElement) {
+    if (!canOpenSettings()) {
+        if (!getSignInCookie()) {
+            setSettingsRoute(false);
+        }
+        return;
+    }
     const settingsModal = getSettingsModal();
     const alreadyOpen = settingsModal.style.display === "flex";
     if (!alreadyOpen) {

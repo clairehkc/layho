@@ -21,6 +21,32 @@
 	padding-right: max(1rem, env(safe-area-inset-right));
 }
 
+@media (max-width: 480px) and (orientation: portrait) {
+	#signUpContainer {
+		padding: 5.5rem 2.5rem 2rem;
+		padding-top: max(5.5rem, calc(4rem + env(safe-area-inset-top)));
+		padding-bottom: max(2rem, env(safe-area-inset-bottom));
+		padding-left: max(2.5rem, env(safe-area-inset-left));
+		padding-right: max(2.5rem, env(safe-area-inset-right));
+	}
+
+	#signUpHeader {
+		font-size: 2.1em;
+	}
+
+	#signUpDescription {
+		font-size: 1.1em;
+	}
+
+	.signUpField label {
+		font-size: 1.25em;
+	}
+
+	.signUpField input {
+		font-size: 1.1em;
+	}
+}
+
 #signUpContentContainer {
 	display: flex;
 	align-items: center;
