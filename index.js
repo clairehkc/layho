@@ -79,7 +79,12 @@ function handleUnauthorizedSignIn(notify = false) {
     showSignInControls();
     syncHomeSettingsButton();
     if (notify && typeof showToast === "function") {
-        showToast("This account isn't authorized. Please sign up.");
+        showToast("This account isn't authorized. Please Sign up.", {
+            label: "Sign up",
+            onClick() {
+                showSignUp(document.getElementById("signUpButton"));
+            },
+        });
     }
 }
 

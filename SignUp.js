@@ -39,6 +39,7 @@ async function submitSignUp(formData) {
 
 function showSignUp(trigger = document.activeElement) {
     const signUpModal = getSignUpModal();
+    hideToast();
     signUpTrigger = trigger;
     setBackgroundInert(true);
     signUpModal.style.display = "flex";
@@ -58,14 +59,45 @@ function closeSignUp(shouldRestoreFocus = true) {
     }
 }
 
-function showToast(message) {
+function hideToast() {
     const toast = document.getElementById("toast");
-    toast.textContent = message;
+    toast.classList.remove("visible");
+    clearTimeout(toastTimeout);
+}
+
+function createToastAction(action) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "toastAction";
+    button.textContent = action.label;
+    button.addEventListener("click", () => {
+        action.onClick();
+    });
+    return button;
+}
+
+function showToast(message, action) {
+    const toast = document.getElementById("toast");
+    toast.replaceChildren();
+
+    if (action?.label) {
+        const labelIndex = message.indexOf(action.label);
+        if (labelIndex === -1) {
+            toast.append(document.createTextNode(`${message} `), createToastAction(action));
+        } else {
+            toast.append(
+                document.createTextNode(message.slice(0, labelIndex)),
+                createToastAction(action),
+                document.createTextNode(message.slice(labelIndex + action.label.length))
+            );
+        }
+    } else {
+        toast.textContent = message;
+    }
+
     toast.classList.add("visible");
     clearTimeout(toastTimeout);
-    toastTimeout = setTimeout(() => {
-        toast.classList.remove("visible");
-    }, 4000);
+    toastTimeout = setTimeout(hideToast, action ? 8000 : 4000);
 }
 
 whenViewsReady(function () {
