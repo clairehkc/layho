@@ -37,11 +37,77 @@ try {
 const CONVERSATION_LANGUAGE_CONFIRMATIONS = 2;
 const MIN_TRANSLATION_FONT_SIZE_PX = 10;
 const TRANSLATION_TEXT_MARGIN_PX = 48;
+const MAX_TRANSLATION_TEXT_MS = 8000;
+
+let translationTextCycleStartedAt = 0;
+let translationTextOriginLength = 0;
+let translationTextWindowedThroughMs = 0;
+
+function resultDurationMs(result) {
+    return typeof result?.duration === "number" ? result.duration / 10000 : 0;
+}
+
+function resetTranslationTextCycle() {
+    translationTextCycleStartedAt = 0;
+    translationTextOriginLength = 0;
+    translationTextWindowedThroughMs = 0;
+}
 
 function resetUiForScenarioStart() {
     detected.textContent = "";
     translated.textContent = "";
+    resetTranslationTextCycle();
     fitTranslationText();
+}
+
+function visibleSourceText(fullText) {
+    if (!fullText) return "";
+    if (translationTextOriginLength > 0) {
+        if (fullText.length <= translationTextOriginLength) {
+            translationTextOriginLength = 0;
+        } else {
+            return fullText.slice(translationTextOriginLength).trimStart();
+        }
+    }
+    return fullText;
+}
+
+function activeTranslationTimeMs(result, now = Date.now()) {
+    const durationMs = resultDurationMs(result);
+    if (durationMs > 0) return durationMs;
+    if (!translationTextCycleStartedAt) {
+        translationTextCycleStartedAt = now;
+    }
+    return now - translationTextCycleStartedAt;
+}
+
+function maybeResetTranslationTextForActiveTime(fullText, result) {
+    if (!fullText) return;
+
+    const durationMs = resultDurationMs(result);
+    const activeMs = activeTranslationTimeMs(result);
+    if (activeMs - translationTextWindowedThroughMs < MAX_TRANSLATION_TEXT_MS) return;
+
+    translationTextOriginLength = fullText.length;
+    translationTextWindowedThroughMs = durationMs > 0 ? activeMs : 0;
+    translationTextCycleStartedAt = Date.now();
+    translated.textContent = "";
+}
+
+function recentTextForDuration(text, result) {
+    if (!text) return "";
+    const durationMs = resultDurationMs(result);
+    if (durationMs <= MAX_TRANSLATION_TEXT_MS) return text;
+    const keepChars = Math.max(1, Math.ceil(text.length * (MAX_TRANSLATION_TEXT_MS / durationMs)));
+    const start = Math.max(0, text.length - keepChars);
+    return text.slice(start).replace(/^\S*\s+/, "") || text.slice(start);
+}
+
+function setDetectedDisplay(fullText, isPartial) {
+    const visible = visibleSourceText(fullText);
+    detected.textContent = visible
+        ? `${visible}${isPartial ? " [...]" : ""}\r\n`
+        : "";
 }
 
 function translationTextOverflows(container, content) {
@@ -442,8 +508,8 @@ function onRecognizing(sender, recognitionEventArgs) {
     const result = recognitionEventArgs.result;
     if (!result.text || !shouldPresentRecognizer(sender)) return;
     presentFromRecognizer(sender);
-    detected.textContent = detected.textContent.replace(/(.*)(^|[\r\n]+).*\[\.\.\.\][\r\n]+/, '$1$2')
-        + `${result.text} [...]\r\n`;
+    maybeResetTranslationTextForActiveTime(result.text, result);
+    setDetectedDisplay(result.text, true);
     scheduleFitTranslationText();
 }
 
@@ -465,9 +531,6 @@ function onRecognized(sender, recognitionEventArgs) {
 function onRecognizedResult(result) {
     detected.scrollTop = detected.scrollHeight;
 
-    if (result.text) detected.textContent = detected.textContent.replace(/(.*)(^|[\r\n]+).*\[\.\.\.\][\r\n]+/, '$1$2')
-        + `${result.text} [...]\r\n`;
-
     switch (result.reason) {
         case SpeechSDK.ResultReason.NoMatch:
             const noMatchDetail = SpeechSDK.NoMatchDetails.fromResult(result);
@@ -477,17 +540,20 @@ function onRecognizedResult(result) {
             break;
         case SpeechSDK.ResultReason.RecognizedSpeech:
         case SpeechSDK.ResultReason.TranslatedSpeech:
+            translationTextOriginLength = 0;
             if (result.text) {
-                detected.textContent = `${result.text}\r\n`;
+                setDetectedDisplay(recentTextForDuration(result.text, result), false);
             }
 
             if (result.translations) {
                 const resultJson = JSON.parse(result.json);
                 resultJson['Translation']['Translations'].forEach(
                     function (translation) {
-                    translated.textContent = `${translation.DisplayText}\r\n`;
+                    translated.textContent = `${recentTextForDuration(translation.DisplayText, result)}\r\n`;
                 });
             }
+
+            resetTranslationTextCycle();
             break;
     }
 
