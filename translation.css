@@ -157,6 +157,23 @@
 	overflow-wrap: break-word;
 }
 
+#translationContainer.transcription-only #languageSelectionDisplay {
+	grid-template-columns: 1fr;
+}
+
+#translationContainer.transcription-only #speechRecognitionLanguageDisplay {
+	justify-self: center;
+	text-align: center;
+	justify-content: center;
+}
+
+#translationContainer.transcription-only #switchLanguageButton,
+#translationContainer.transcription-only #targetLanguageDisplay,
+#translationContainer.transcription-only #separator,
+#translationContainer.transcription-only #translated {
+	display: none;
+}
+
 #translationDisplayContainer {
 	display: flex;
 	flex: 1;

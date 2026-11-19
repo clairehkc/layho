@@ -30,5 +30,6 @@ Layho uses the [Azure AI Speech SDK](https://learn.microsoft.com/azure/ai-servic
 ### Modes
 
 - **Voice output** — plays translated speech using Azure neural voices.
-- **Conversation mode** — runs two recognizers and auto-switches between the source and target languages selected in Settings based on detected speech. Incompatible with voice output.
+- **Conversation mode** — runs two recognizers and auto-switches between the source and target languages selected in Settings based on detected speech. Incompatible with voice output and transcription only.
+- **Transcription only** — transcribes microphone audio and displays it without translating. Incompatible with conversation mode.
 - **Switch** — manually swaps source and target languages mid-session (hidden in conversation mode).

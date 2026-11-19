@@ -7,6 +7,7 @@ let speechRecognitionLanguageOptions;
 let targetLanguageOptions;
 let voiceOutputInput;
 let conversationModeInput;
+let transcriptionOnlyInput;
 
 let settingsList;
 let savedSettingsValues;
@@ -46,7 +47,8 @@ function getSelectedSettingsValues() {
         speechRecognitionLanguageOptions.value,
         targetLanguageOptions.value,
         voiceOutputInput.checked,
-        conversationModeInput.checked
+        conversationModeInput.checked,
+        transcriptionOnlyInput.checked
     ];
 }
 
@@ -66,7 +68,8 @@ function persistSettings() {
         speechRecognitionLanguage: speechRecognitionLanguageOptions.value,
         targetLanguage: targetLanguageOptions.value,
         voiceOutput: voiceOutputInput.checked,
-        conversationMode: conversationModeInput.checked
+        conversationMode: conversationModeInput.checked,
+        transcriptionOnly: transcriptionOnlyInput.checked
     }), settingsCookieMaxAgeSeconds);
 }
 
@@ -92,6 +95,10 @@ function applyPersistedSettings() {
     );
     voiceOutputInput.checked = Boolean(saved.voiceOutput);
     conversationModeInput.checked = Boolean(saved.conversationMode);
+    transcriptionOnlyInput.checked = Boolean(saved.transcriptionOnly);
+    if (conversationModeInput.checked && transcriptionOnlyInput.checked) {
+        transcriptionOnlyInput.checked = false;
+    }
     if (voiceOutputInput.checked && conversationModeInput.checked) {
         conversationModeInput.checked = false;
     }
@@ -132,6 +139,7 @@ function restoreSettingsValues() {
     targetLanguageOptions.value = savedSettingsValues[1];
     voiceOutputInput.checked = savedSettingsValues[2];
     conversationModeInput.checked = savedSettingsValues[3];
+    transcriptionOnlyInput.checked = savedSettingsValues[4];
     syncLanguageDisplaysFromSettings();
 }
 
@@ -252,13 +260,60 @@ function closeSettings(shouldRestoreFocus = true) {
     hideSettings(shouldRestoreFocus);
 }
 
+function setSpeechStatus(message) {
+    document.getElementById("speechStatus").textContent = message;
+}
+
+function applyConversationTranscriptionExclusivity(changedInput) {
+    if (changedInput === conversationModeInput && conversationModeInput.checked && transcriptionOnlyInput.checked) {
+        transcriptionOnlyInput.checked = false;
+        setSpeechStatus("Conversation mode on. Transcription only turned off.");
+        return true;
+    }
+    if (changedInput === transcriptionOnlyInput && transcriptionOnlyInput.checked && conversationModeInput.checked) {
+        conversationModeInput.checked = false;
+        setSpeechStatus("Transcription only on. Conversation mode turned off.");
+        return true;
+    }
+    return false;
+}
+
+function onConversationModeToggle() {
+    applyConversationTranscriptionExclusivity(conversationModeInput);
+    if (conversationModeInput.checked && voiceOutputInput.checked) {
+        voiceOutputInput.checked = false;
+        setSpeechStatus("Conversation mode on. Voice output turned off.");
+    }
+}
+
+function onTranscriptionOnlyToggle() {
+    applyConversationTranscriptionExclusivity(transcriptionOnlyInput);
+}
+
+function bindExclusiveToggle(input, onToggle) {
+    input.addEventListener("change", onToggle);
+    input.addEventListener("input", onToggle);
+    const switchLabel = input.closest("label.switch");
+    if (switchLabel) {
+        switchLabel.addEventListener("click", () => {
+            queueMicrotask(onToggle);
+        });
+    }
+}
+
 function submitSettings() {
+    applyConversationTranscriptionExclusivity(
+        transcriptionOnlyInput.checked ? transcriptionOnlyInput : conversationModeInput
+    );
     const didChange = didSettingsChange();
     updateSavedSettingsValues();
     hideSettings();
+    if (typeof syncTranscriptionOnlyUi === "function") {
+        syncTranscriptionOnlyUi();
+    }
     if (didChange) {
         restartContinuousTranslation();
-        document.getElementById("speechStatus").textContent = "Settings applied.";
+        setSpeechStatus("Settings applied.");
     }
 }
 
@@ -286,6 +341,9 @@ async function populateLanguageOptions() {
 
     applyPersistedSettings();
     updateSavedSettingsValues();
+    if (typeof syncTranscriptionOnlyUi === "function") {
+        syncTranscriptionOnlyUi();
+    }
 
     speechRecognitionLanguageOptions.addEventListener("change", syncLanguageDisplaysFromSettings);
     targetLanguageOptions.addEventListener("change", syncLanguageDisplaysFromSettings);
@@ -298,23 +356,18 @@ whenViewsReady(function () {
     targetLanguageOptions = document.getElementById("targetLanguageOptions");
     voiceOutputInput = document.getElementById("voiceOutputInput");
     conversationModeInput = document.getElementById("conversationModeInput");
+    transcriptionOnlyInput = document.getElementById("transcriptionOnlyInput");
     populateLanguageOptions();
 
     voiceOutputInput.addEventListener("change", () => {
         if (voiceOutputInput.checked && conversationModeInput.checked) {
             conversationModeInput.checked = false;
-            document.getElementById("speechStatus").textContent =
-                "Voice output on. Conversation mode turned off.";
+            setSpeechStatus("Voice output on. Conversation mode turned off.");
         }
     });
 
-    conversationModeInput.addEventListener("change", () => {
-        if (conversationModeInput.checked && voiceOutputInput.checked) {
-            voiceOutputInput.checked = false;
-            document.getElementById("speechStatus").textContent =
-                "Conversation mode on. Voice output turned off.";
-        }
-    });
+    bindExclusiveToggle(conversationModeInput, onConversationModeToggle);
+    bindExclusiveToggle(transcriptionOnlyInput, onTranscriptionOnlyToggle);
 
     [speechRecognitionLanguageOptions, targetLanguageOptions].forEach((select) => {
         select.addEventListener("keydown", (event) => {
@@ -335,7 +388,7 @@ whenViewsReady(function () {
         });
     });
 
-    [voiceOutputInput, conversationModeInput].forEach((input) => {
+    [voiceOutputInput, conversationModeInput, transcriptionOnlyInput].forEach((input) => {
         input.addEventListener("keydown", (event) => {
             if (event.key === "Enter") {
                 event.preventDefault();

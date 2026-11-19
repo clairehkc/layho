@@ -313,6 +313,7 @@ whenViewsReady(function () {
 
     detected = document.getElementById("detected");
     translated = document.getElementById("translated");
+    syncTranscriptionOnlyUi();
 
     const translationDisplayContainer = document.getElementById("translationDisplayContainer");
     new ResizeObserver(scheduleFitTranslationText).observe(translationDisplayContainer);
@@ -545,7 +546,7 @@ function onRecognizedResult(result) {
                 setDetectedDisplay(recentTextForDuration(result.text, result), false);
             }
 
-            if (result.translations) {
+            if (result.translations && !transcriptionOnlyInput.checked) {
                 const resultJson = JSON.parse(result.json);
                 resultJson['Translation']['Translations'].forEach(
                     function (translation) {
@@ -665,6 +666,68 @@ function doContinuousTranslation(newSpeechRecognitionLanguage = undefined, newTa
     newTranslationRecognizer.layhoSpeechLanguage = speechConfig.speechRecognitionLanguage;
     newTranslationRecognizer.layhoTargetLanguage = targetLanguage;
     return newTranslationRecognizer;
+}
+
+function doContinuousTranscription(newSpeechRecognitionLanguage = undefined) {
+    console.log("doContinuousTranscription", newSpeechRecognitionLanguage);
+    if (!apiKey) {
+        console.error('no apiKey');
+        return undefined;
+    }
+
+    isListening = true;
+    resetUiForScenarioStart();
+
+    const audioConfig = getAudioConfig();
+    const speechConfig = getSpeechConfig(SpeechSDK.SpeechConfig, newSpeechRecognitionLanguage);
+    if (!(audioConfig && speechConfig)) return;
+
+    const newSpeechRecognizer = new SpeechSDK.SpeechRecognizer(speechConfig, audioConfig);
+    applyCommonConfigurationTo(newSpeechRecognizer);
+
+    newSpeechRecognizer.startContinuousRecognitionAsync();
+    newSpeechRecognizer.layhoSpeechLanguage = speechConfig.speechRecognitionLanguage;
+    return newSpeechRecognizer;
+}
+
+function syncTranscriptionOnlyUi() {
+    const translationContainer = document.getElementById("translationContainer");
+    if (!translationContainer) return;
+
+    const transcriptionOnly = Boolean(transcriptionOnlyInput?.checked);
+    translationContainer.classList.toggle("transcription-only", transcriptionOnly);
+
+    const detectedEl = document.getElementById("detected");
+    const translatedEl = document.getElementById("translated");
+    if (detectedEl) {
+        if (transcriptionOnly) {
+            detectedEl.setAttribute("aria-live", "polite");
+            detectedEl.setAttribute("aria-atomic", "true");
+        } else {
+            detectedEl.removeAttribute("aria-live");
+            detectedEl.removeAttribute("aria-atomic");
+        }
+    }
+    if (translatedEl) {
+        if (transcriptionOnly) {
+            translatedEl.removeAttribute("aria-live");
+            translatedEl.removeAttribute("aria-atomic");
+        } else {
+            translatedEl.setAttribute("aria-live", "polite");
+            translatedEl.setAttribute("aria-atomic", "true");
+        }
+    }
+
+    const startLabel = document.querySelector("#startButton .buttonLabel");
+    const stopLabel = document.querySelector("#stopButton .buttonLabel");
+    if (startLabel) {
+        startLabel.textContent = transcriptionOnly ? "Start transcribing" : "Start translating";
+    }
+    if (stopLabel) {
+        stopLabel.textContent = transcriptionOnly ? "Stop transcribing" : "Stop translating";
+    }
+
+    scheduleFitTranslationText();
 }
 
 function updateLanguageDisplays(fromLocale, toLocale) {
@@ -795,6 +858,14 @@ function startContinuousTranslation(newSpeechRecognitionLanguage, newTargetLangu
     const targetLang = newTargetLanguage || targetLanguageOptions.value;
 
     resetConversationLanguageDetection(speechLang);
+    if (transcriptionOnlyInput.checked) {
+        translationRecognizer1 = doContinuousTranscription(speechLang);
+        activeTranslationRecognizer = translationRecognizer1;
+        speechRecognitionLanguage = speechLang;
+        updateLanguageDisplays(speechLang, targetLang);
+        return;
+    }
+
     translationRecognizer1 = doContinuousTranslation(speechLang, targetLang);
     activeTranslationRecognizer = translationRecognizer1;
     speechRecognitionLanguage = speechLang;
