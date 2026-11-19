@@ -20,8 +20,9 @@
 						<div class="settingOption">
 							<label id="voiceOutputLabel" for="voiceOutputInput" class="settingOptionLabel">Voice</label>
 							<label class="switch">
-								<input id="voiceOutputInput" type="checkbox" aria-labelledby="voiceOutputLabel" aria-describedby="exclusiveModeHint">
+								<input id="voiceOutputInput" type="checkbox" aria-labelledby="voiceOutputLabel" aria-describedby="voiceOutputHint exclusiveModeHint">
 								<span class="slider" aria-hidden="true"></span>
+								<span id="voiceOutputHint" class="settingTooltip" role="tooltip">Speak translations aloud.</span>
 							</label>
 						</div>
 					</div>
@@ -30,15 +31,17 @@
 						<div class="settingOption">
 							<label id="conversationModeLabel" for="conversationModeInput" class="settingOptionLabel">Conversation</label>
 							<label class="switch">
-								<input id="conversationModeInput" type="checkbox" aria-labelledby="conversationModeLabel" aria-describedby="exclusiveModeHint">
+								<input id="conversationModeInput" type="checkbox" aria-labelledby="conversationModeLabel" aria-describedby="conversationModeHint exclusiveModeHint">
 								<span class="slider" aria-hidden="true"></span>
+								<span id="conversationModeHint" class="settingTooltip" role="tooltip">Switch languages as each person speaks.</span>
 							</label>
 						</div>
 						<div class="settingOption">
 							<label id="transcriptionOnlyLabel" for="transcriptionOnlyInput" class="settingOptionLabel">Transcription only</label>
 							<label class="switch">
-								<input id="transcriptionOnlyInput" type="checkbox" aria-labelledby="transcriptionOnlyLabel" aria-describedby="exclusiveModeHint">
+								<input id="transcriptionOnlyInput" type="checkbox" aria-labelledby="transcriptionOnlyLabel" aria-describedby="transcriptionOnlyHint exclusiveModeHint">
 								<span class="slider" aria-hidden="true"></span>
+								<span id="transcriptionOnlyHint" class="settingTooltip" role="tooltip">Transcribe without translating.</span>
 							</label>
 						</div>
 					</div>
