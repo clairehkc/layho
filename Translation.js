@@ -394,6 +394,22 @@ function toggleTranslationFullscreen() {
     });
 }
 
+function onTranslationBackgroundDoubleClick() {
+    if (isListening) {
+        stopContinuousTranslation();
+        setTranslationChromeHidden(false);
+        exitTranslationFullscreen();
+        return;
+    }
+    startContinuousTranslation();
+    if (!isListening) return;
+    if (isBrowserFullscreen()) {
+        setTranslationChromeHidden(true);
+        return;
+    }
+    toggleTranslationFullscreen();
+}
+
 whenViewsReady(function () {
     startButton = document.getElementById("startButton");
     stopButton = document.getElementById("stopButton");
@@ -435,10 +451,35 @@ whenViewsReady(function () {
     };
     translationDisplayContainer.addEventListener("pointerup", clearChromeTogglePointer);
     translationDisplayContainer.addEventListener("pointercancel", clearChromeTogglePointer);
-    translationDisplayContainer.addEventListener("click", function () {
+    // Wait past the double-click window so the first click does not toggle
+    // controls before a double-click starts or stops translation.
+    const backgroundDoubleClickMs = 500;
+    let backgroundClickTimer = 0;
+    const clearBackgroundClick = function () {
+        clearTimeout(backgroundClickTimer);
+        backgroundClickTimer = 0;
+    };
+    translationDisplayContainer.addEventListener("mousedown", function (event) {
+        if (event.detail > 1) event.preventDefault();
+    });
+    translationDisplayContainer.addEventListener("click", function (event) {
         if (chromeToggleWasDrag) return;
+        if (event.detail > 1) {
+            clearBackgroundClick();
+            return;
+        }
         if (!isTranslationChromeHidden() && !isBrowserFullscreen()) return;
-        toggleTranslationChrome();
+        clearBackgroundClick();
+        backgroundClickTimer = setTimeout(function () {
+            backgroundClickTimer = 0;
+            toggleTranslationChrome();
+        }, backgroundDoubleClickMs);
+    });
+    translationDisplayContainer.addEventListener("dblclick", function (event) {
+        clearBackgroundClick();
+        if (chromeToggleWasDrag) return;
+        event.preventDefault();
+        onTranslationBackgroundDoubleClick();
     });
 
     const switchLanguageButton = document.getElementById("switchLanguageButton");
