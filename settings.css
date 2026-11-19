@@ -118,6 +118,13 @@
 	text-decoration: none;
 }
 
+button.settingsPrivacyLink {
+	padding: 0;
+	border-radius: 0;
+	justify-content: flex-start;
+	font-size: 1em;
+}
+
 .settingsPrivacyLinkText {
 	text-decoration: underline;
 	text-underline-offset: 3px;

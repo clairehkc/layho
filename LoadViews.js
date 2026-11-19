@@ -8,13 +8,15 @@ async function loadHtml(url) {
 
 const viewsReady = (async function loadViews() {
     const speechStatus = document.getElementById("speechStatus");
-    const [settingsHtml, signUpHtml, translationHtml] = await Promise.all([
+    const [settingsHtml, signUpHtml, onboardingHtml, translationHtml] = await Promise.all([
         loadHtml("settings.html"),
         loadHtml("sign-up.html"),
+        loadHtml("onboarding.html"),
         loadHtml("translation.html"),
     ]);
     speechStatus.insertAdjacentHTML("beforebegin", settingsHtml);
     speechStatus.insertAdjacentHTML("beforebegin", signUpHtml);
+    speechStatus.insertAdjacentHTML("beforebegin", onboardingHtml);
     speechStatus.insertAdjacentHTML("beforebegin", translationHtml);
 })();
 
