@@ -195,6 +195,47 @@ select {
 	max-width: 12em;
 	min-width: 0;
 	justify-self: start;
+	appearance: none;
+	-webkit-appearance: none;
+	padding: 0 2.15em 0 0.4em;
+	border: 1px solid rgb(133, 133, 133);
+	background-color: rgb(59, 59, 59);
+	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none'%3E%3Cpath d='M1 1.2 6 6.2 11 1.2' stroke='%23e6e6e6' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+	background-repeat: no-repeat;
+	background-position: right 0.8em center;
+	background-size: 0.8em 0.55em;
+	color: rgb(255, 255, 255);
+	cursor: pointer;
+}
+
+.languageList {
+	position: fixed;
+	z-index: 12;
+	margin: 0;
+	padding: 0;
+	overflow-y: auto;
+	overscroll-behavior: contain;
+	background-color: rgb(59, 59, 59);
+	border: 1px solid rgb(133, 133, 133);
+	color: rgb(255, 255, 255);
+	scrollbar-width: thin;
+	scrollbar-color: rgb(255, 255, 255) transparent;
+}
+
+.languageList[hidden] {
+	display: none;
+}
+
+.languageListOption {
+	padding: 0.35em 0.4em;
+	line-height: 1.3;
+	cursor: pointer;
+	user-select: none;
+}
+
+.languageListOption.is-active {
+	background-color: var(--secondary-link-color);
+	color: rgb(255, 255, 255);
 }
 
 @media (max-height: 480px) {
