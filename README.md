@@ -4,19 +4,6 @@ Live speech translation app. Sign in with Google, configure languages, and start
 
 **Live:** [https://layho.app](https://layho.app)
 
-## Prerequisites
-
-- A modern browser (Chrome recommended)
-- Python 3 (for local development server)
-
-## Local development
-
-```bash
-python3 -m http.server 8765
-```
-
-Open [http://localhost:8765](http://localhost:8765), sign in, and click **START** to begin translating.
-
 ## Microsoft translation
 
 Layho uses the [Azure AI Speech SDK](https://learn.microsoft.com/azure/ai-services/speech-service/) for real-time speech-to-text and translation. The SDK is loaded from Microsoft's CDN in the browser — no local install needed.
