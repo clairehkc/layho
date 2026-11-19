@@ -179,7 +179,7 @@ button.settingsPrivacyLink {
 	grid-column: 1 / -1;
 	align-items: center;
 	width: 100%;
-	padding: 0.16rem 0 0.16rem 0.75rem;
+	padding: 0.5rem 0 0.5rem 0.75rem;
 }
 
 .settingOptionLabel {
@@ -216,8 +216,8 @@ select {
 	}
 
 	.settingOption {
-		padding-top: 0.12rem;
-		padding-bottom: 0.12rem;
+		padding-top: max(0.4rem, 8px);
+		padding-bottom: max(0.4rem, 8px);
 	}
 
 	.settingsPrivacyLink + .settingsPrivacyLink {
