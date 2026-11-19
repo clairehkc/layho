@@ -233,6 +233,10 @@
 	word-wrap: break-word;
 }
 
+#detected {
+	font-size: calc(var(--translation-text-size) * 4 / 6);
+}
+
 #separator {
 	height: 6px;
 	background-color: #868686;
