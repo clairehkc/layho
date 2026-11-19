@@ -38,6 +38,8 @@ const CONVERSATION_LANGUAGE_CONFIRMATIONS = 2;
 const MIN_TRANSLATION_FONT_SIZE_PX = 10;
 const TRANSLATION_TEXT_MARGIN_PX = 48;
 const MAX_TRANSLATION_TEXT_MS = 8000;
+const STALE_FIT_RETRY_MS = 400;
+const VIEWPORT_SETTLE_MS = 300;
 
 let translationTextCycleStartedAt = 0;
 let translationTextOriginLength = 0;
@@ -110,36 +112,68 @@ function setDetectedDisplay(fullText, isPartial) {
         : "";
 }
 
-function translationTextOverflows(container, content) {
-    return content.scrollHeight > container.clientHeight - TRANSLATION_TEXT_MARGIN_PX
-        || content.scrollWidth > container.clientWidth - TRANSLATION_TEXT_MARGIN_PX;
+function translationTextMetrics(container, content) {
+    const height = content.scrollHeight;
+    const width = content.scrollWidth;
+    return {
+        height,
+        width,
+        overflows: height > container.clientHeight - TRANSLATION_TEXT_MARGIN_PX
+            || width > container.clientWidth - TRANSLATION_TEXT_MARGIN_PX,
+    };
 }
 
-function fitTranslationText() {
+function translationHasVisibleText() {
+    return [document.getElementById("detected"), document.getElementById("translated")].some((element) =>
+        element && element.textContent.trim()
+    );
+}
+
+function restoreTranslationTextSize(resultsContainer, previousSize) {
+    if (previousSize) {
+        resultsContainer.style.setProperty("--translation-text-size", previousSize);
+    } else {
+        resultsContainer.style.removeProperty("--translation-text-size");
+    }
+}
+
+function fitTranslationTextOnce() {
     const container = document.getElementById("translationDisplayContainer");
     const resultsContainer = document.getElementById("resultsContainer");
-    if (!container || !resultsContainer) return;
-
-    resultsContainer.style.removeProperty("--translation-text-size");
-
-    const textElement = document.querySelector(".translationTextContainer");
-    if (!textElement) return;
+    if (!container || !resultsContainer) return "skipped";
 
     const availableHeight = container.clientHeight - TRANSLATION_TEXT_MARGIN_PX;
     const availableWidth = container.clientWidth - TRANSLATION_TEXT_MARGIN_PX;
-    if (availableHeight <= 0 || availableWidth <= 0) return;
+    if (availableHeight <= 0 || availableWidth <= 0) return "skipped";
+
+    const previousSize = resultsContainer.style.getPropertyValue("--translation-text-size");
+    resultsContainer.style.removeProperty("--translation-text-size");
+
+    const textElement = resultsContainer.querySelector(".translationTextContainer");
+    if (!textElement) {
+        restoreTranslationTextSize(resultsContainer, previousSize);
+        return "skipped";
+    }
 
     const cssDefaultSize = parseFloat(getComputedStyle(textElement).fontSize);
     const maxFontSize = Math.max(cssDefaultSize, availableHeight, availableWidth);
-
     let low = MIN_TRANSLATION_FONT_SIZE_PX;
     let high = maxFontSize;
-    let bestFit = maxFontSize;
+    let bestFit = null;
+    let minMeasured = Infinity;
+    let maxMeasured = 0;
 
     while (low <= high) {
         const mid = Math.floor((low + high) / 2);
         resultsContainer.style.setProperty("--translation-text-size", `${mid}px`);
-        if (translationTextOverflows(container, resultsContainer)) {
+        // Read a child layout box so a custom-property font change flushes
+        // before the scroll size is sampled.
+        textElement.offsetHeight;
+        const metrics = translationTextMetrics(container, resultsContainer);
+        const measured = Math.max(metrics.height, metrics.width);
+        minMeasured = Math.min(minMeasured, measured);
+        maxMeasured = Math.max(maxMeasured, measured);
+        if (metrics.overflows) {
             high = mid - 1;
         } else {
             bestFit = mid;
@@ -147,13 +181,66 @@ function fitTranslationText() {
         }
     }
 
-    resultsContainer.style.setProperty("--translation-text-size", `${bestFit}px`);
+    // Android Chrome can keep the pre-resize text metrics for every candidate
+    // while the toolbar or orientation change is in progress. The search used
+    // to keep the maximum size in that case, which clipped the caption until
+    // the next translation.
+    if (translationHasVisibleText() && maxMeasured - minMeasured < 1) {
+        restoreTranslationTextSize(resultsContainer, previousSize);
+        return "stale";
+    }
+
+    resultsContainer.style.setProperty(
+        "--translation-text-size",
+        `${bestFit ?? MIN_TRANSLATION_FONT_SIZE_PX}px`
+    );
+    return "fitted";
 }
 
-let fitTranslationTextFrame;
+let staleFitStartedAt = 0;
+let fitTranslationTextFrame = 0;
+let fitConfirmFrame = 0;
+let viewportSettleTimer = 0;
+let fitConfirming = false;
+
+function fitTranslationText() {
+    const result = fitTranslationTextOnce();
+    if (result === "stale") {
+        if (!staleFitStartedAt) staleFitStartedAt = performance.now();
+        if (performance.now() - staleFitStartedAt < STALE_FIT_RETRY_MS) {
+            fitTranslationTextFrame = requestAnimationFrame(fitTranslationText);
+        }
+        return;
+    }
+    staleFitStartedAt = 0;
+    if (result !== "fitted" || fitConfirming) return;
+
+    fitConfirmFrame = requestAnimationFrame(() => {
+        fitConfirmFrame = 0;
+        const container = document.getElementById("translationDisplayContainer");
+        const resultsContainer = document.getElementById("resultsContainer");
+        if (!container || !resultsContainer) return;
+        if (!translationTextMetrics(container, resultsContainer).overflows) return;
+        fitConfirming = true;
+        fitTranslationText();
+        fitConfirming = false;
+    });
+}
+
 function scheduleFitTranslationText() {
     cancelAnimationFrame(fitTranslationTextFrame);
+    cancelAnimationFrame(fitConfirmFrame);
+    fitConfirmFrame = 0;
     fitTranslationTextFrame = requestAnimationFrame(fitTranslationText);
+}
+
+function scheduleFitTranslationTextAfterViewportChange() {
+    scheduleFitTranslationText();
+    clearTimeout(viewportSettleTimer);
+    viewportSettleTimer = setTimeout(() => {
+        staleFitStartedAt = 0;
+        scheduleFitTranslationText();
+    }, VIEWPORT_SETTLE_MS);
 }
 
 function getFullscreenElement() {
@@ -316,8 +403,11 @@ whenViewsReady(function () {
     syncTranscriptionOnlyUi();
 
     const translationDisplayContainer = document.getElementById("translationDisplayContainer");
-    new ResizeObserver(scheduleFitTranslationText).observe(translationDisplayContainer);
-    window.addEventListener("resize", scheduleFitTranslationText);
+    new ResizeObserver(scheduleFitTranslationTextAfterViewportChange).observe(translationDisplayContainer);
+    window.addEventListener("resize", scheduleFitTranslationTextAfterViewportChange);
+    if (window.visualViewport) {
+        window.visualViewport.addEventListener("resize", scheduleFitTranslationTextAfterViewportChange);
+    }
     lastBrowserFullscreen = isBrowserFullscreen();
     ["fullscreenchange", "webkitfullscreenchange"].forEach((eventName) => {
         document.addEventListener(eventName, syncTranslationFullscreenUi);
